@@ -284,13 +284,13 @@
     if (t.slice(0, 2) === '00') d = d.slice(2);
     if (!intl && d.length === 11 && d.charAt(0) === '8') d = '7' + d.slice(1);
     else if (!intl && d.length === 10 && '79'.indexOf(d.charAt(0)) >= 0) d = '7' + d;
-    if (d.length <= 6 || d.indexOf('7800') === 0 || d.indexOf('8800') === 0) return ['unknown', 10, ['phone_short', 'phone_rule']];
+    if (d.length <= 6 || d.indexOf('7800') === 0 || d.indexOf('8800') === 0) return ['unknown', 10, ['phone_note', 'phone_short', 'phone_rule']];
     if (d.charAt(0) === '7' && d.length === 11) {
-      if ('67'.indexOf(d.charAt(1)) >= 0) return ['unknown', 0, ['phone_kz', 'phone_rule']];
-      return ['suspicious', 30, ['phone_ru', 'phone_rule']];
+      if ('67'.indexOf(d.charAt(1)) >= 0) return ['unknown', 0, ['phone_note', 'phone_kz', 'phone_rule']];
+      return ['suspicious', 30, ['phone_note', 'phone_ru', 'phone_rule']];
     }
-    if (d.charAt(0) !== '7' && d.length >= 8 && d.length <= 15 && intl) return ['suspicious', 40, ['phone_foreign', 'phone_rule']];
-    return ['unknown', 0, ['phone_only', 'phone_rule']];
+    if (d.charAt(0) !== '7' && d.length >= 8 && d.length <= 15 && intl) return ['suspicious', 40, ['phone_note', 'phone_foreign', 'phone_rule']];
+    return ['unknown', 0, ['phone_note', 'phone_only', 'phone_rule']];
   }
   /* type: link | qr | sms | call. Результат как у сервера: {level, score, label, reasons[{code,text}], advice[], urls[], disclaimer} */
   function check(type, content, lang) {
@@ -320,6 +320,7 @@
         if (r.re.test(a[0]) || r.re.test(b[0])) { tc[r.code] = 1; score += r.w; if (codes.indexOf(r.code) < 0) codes.push(r.code); }
       });
       if (tc.official_claim && KB.rules.combo_base.some(function (c) { return tc[c]; })) score += 15;
+      if (tc.money && (tc.foreign_card || tc.urgency || tc.link_action || us || (RX.ml && RX.ml.link && RX.ml.link.test(b[0])))) codes.push('hack_warning');
       var ml = mlScore(b[0]);
       if (ml) {
         var z = ml[0], t = RX.ml.t[script(b[0])], C = RX.ml.cfg, tk = Object.keys(tc), lw = !!(RX.ml.link && RX.ml.link.test(b[0]));
@@ -474,7 +475,7 @@
     var lg = detectLang(text, opts.lang), nt = norm(text), toks = tokens(nt), tj = ' ' + toks.join(' ') + ' ', h = hash(nt);
     if (!toks.length) return { text: fallback(lg, h), res: null };
     var res = check('sms', text, lg);
-    var codes = res.reasons.map(function (r) { return r.code; }).filter(function (c) { return c !== 'no_signals' && c !== 'phone_only' && c !== 'phone_rule'; });
+    var codes = res.reasons.map(function (r) { return r.code; }).filter(function (c) { return c !== 'no_signals' && c !== 'phone_only' && c !== 'phone_rule' && c !== 'phone_note' && c !== 'hack_warning'; });
     var question_ = text.indexOf('?') >= 0 || Q_WORDS.indexOf(toks[0]) >= 0;
     var topic = codeTopic(codes, KB.strong_codes) || bestTopic(tj, toks);
     if (res.urls.length || (codes.length && res.score >= 25 && (!question_ || toks.length > 14 || res.level === 'dangerous'))) return { text: checkAnswer(res, codes, topic, lg), res: res };
