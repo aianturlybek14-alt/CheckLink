@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#09090b" id="thc">
+<meta name="color-scheme" content="dark light">
+<!-- Портал работает автономно: проверки, тренажёр и QuasarAI выполняются в браузере (quasar-core.js + quasar-kb.json).
+     Сервер CheckLink (app.py) дополнительно присылает строгий CSP с хешами встроенных скриптов.
+     Эта же страница встроена в приложение (www/portal, tools/build_portal.js) и там работает без интернета. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; worker-src 'self'">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="CheckLink — проверка ссылок, сообщений, файлов и QR-кодов на мошенничество, разбор адреса сайта, проверка пароля, тренажёр кибербезопасности и база знаний. Бесплатно, без регистрации.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CheckLink">
+<meta property="og:title" content="CheckLink — защита от мошенников">
+<meta property="og:description" content="Проверьте ссылку, сообщение или QR-код до того, как станет поздно. Тренажёр, база знаний и QuasarAI — бесплатно, на русском, казахском и английском.">
+<meta property="og:image" content="https://checkthelink.onrender.com/assets/logo-512.png">
+<meta name="twitter:card" content="summary">
+<title>CheckLink — защита от мошенников</title>
+<link rel="icon" type="image/png" sizes="64x64" href="assets/logo-64.png">
+<link rel="apple-touch-icon" href="assets/logo-180.png">
+<link rel="manifest" href="site.webmanifest">
+<script>/* тема до первой отрисовки */(function(){var t='system';try{t=localStorage.getItem('cl_site_theme')||'system'}catch(e){}if(t==='system')t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.dataset.theme=t==='light'?'light':'dark'})()</script>
+<style>
+/* Те же токены, что у приложения CheckLink (www/index.html) */
+:root{--bg:#09090b;--pn:#121214;--el:#18181b;--bd:#27272a;--bd2:#3f3f46;--tx:#e4e4e7;--mu:#8b8b95;--vi:#7c3aed;--vt:#c4b5fd;--sk:#38bdf8;--gr:#34d399;--rd:#ef4444;--ye:#fbbf24;--hd:rgba(12,12,14,.82);--cd:rgba(24,24,27,.85);--tint:rgba(124,58,237,.18);--sh:rgba(0,0,0,.6);--grid:rgba(52,211,153,.045);--glow:#1e1b4b;--abd:#1f3d36;color-scheme:dark}
+:root[data-theme=light]{--bg:#f5f5f7;--pn:#ffffff;--el:#f0f0f3;--bd:#e0e0e6;--bd2:#c6c6d0;--tx:#18181b;--mu:#5d5d69;--vi:#7c3aed;--vt:#6d28d9;--sk:#0369a1;--gr:#047857;--rd:#b91c1c;--ye:#a16207;--hd:rgba(255,255,255,.86);--cd:rgba(255,255,255,.94);--tint:rgba(124,58,237,.1);--sh:rgba(24,24,40,.14);--grid:rgba(124,58,237,.06);--glow:#ede9fe;--abd:#ddd6fe;color-scheme:light}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{min-height:100%;background:linear-gradient(var(--grid) 1px,transparent 1px) 0 0/34px 34px,linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/34px 34px,radial-gradient(1200px 520px at 50% -120px,var(--glow) 0,transparent 70%),var(--bg);color:var(--tx);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--vt)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-left)) 0 max(16px,env(safe-area-inset-right))}
+header.top{position:sticky;top:0;z-index:30;background:var(--hd);backdrop-filter:blur(14px);border-bottom:1px solid var(--bd);padding-top:env(safe-area-inset-top)}
+.tb{display:flex;align-items:center;gap:12px;min-height:60px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--tx);font-weight:700;font-size:18px;letter-spacing:.2px}
+.brand img{width:34px;height:34px;border-radius:22%}
+nav.nv{display:flex;gap:2px;margin-left:8px}
+nav.nv a{color:var(--mu);text-decoration:none;font-weight:600;font-size:14px;padding:8px 9px;border-radius:10px;white-space:nowrap}
+.seg,.ib,.cta,.brand{flex:0 0 auto}.cta{white-space:nowrap}
+nav.nv a:hover,nav.nv a.on{color:var(--tx);background:var(--el)}
+.sp{flex:1}
+.seg{display:inline-flex;border:1px solid var(--bd);border-radius:12px;overflow:hidden;background:var(--el)}
+.seg button{border:0;background:none;color:var(--mu);font:inherit;font-size:12px;font-weight:700;padding:7px 9px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--tint);color:var(--vt)}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border:1px solid var(--bd);background:var(--el);color:var(--tx);font:inherit;font-size:14px;font-weight:600;padding:9px 14px;border-radius:14px;cursor:pointer;text-decoration:none;transition:filter .2s,transform .1s,border-color .2s}
+.b:hover{filter:brightness(1.12)}.b:active{transform:scale(.97)}.b:disabled{opacity:.5;cursor:default}
+.b.sm{min-height:36px;padding:6px 11px;font-size:13px}
+.bv{background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-color:#7c3aed;color:#fff;box-shadow:0 6px 18px rgba(124,58,237,.35)}
+.bs{background:rgba(56,189,248,.12);border-color:var(--sk);color:var(--sk)}
+.br{background:rgba(239,68,68,.12);border-color:var(--rd);color:var(--rd)}
+.ib{width:40px;min-height:40px;padding:0;font-size:17px}
+.c{background:var(--cd);backdrop-filter:blur(8px);border:1px solid var(--bd);border-radius:20px;padding:18px}
+.mu{color:var(--mu)}
+.t{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:700;background:var(--bd)}
+.t.r{background:rgba(239,68,68,.18);color:var(--rd)}.t.y{background:rgba(251,191,36,.15);color:var(--ye)}.t.g{background:rgba(52,211,153,.15);color:var(--gr)}.t.v{background:var(--tint);color:var(--vt)}
+input,textarea{width:100%;min-height:48px;background:var(--bg);border:1px solid var(--bd);color:var(--tx);border-radius:14px;padding:12px 14px;font:inherit;resize:vertical}
+input:focus,textarea:focus{outline:2px solid var(--vi);outline-offset:-1px}
+:focus-visible{outline:2px solid var(--vi);outline-offset:2px}
+section{padding:46px 0 10px}
+h1{font-size:clamp(28px,5vw,46px);line-height:1.12;letter-spacing:-.02em}
+h2{font-size:clamp(22px,3.2vw,30px);letter-spacing:-.01em;margin-bottom:6px}
+h3{font-size:17px;margin-bottom:4px}
+.grad{background:linear-gradient(90deg,var(--vt),var(--gr));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:center;padding:40px 0 8px}
+.hero p.lead{font-size:17px;color:var(--mu);margin:14px 0 18px;max-width:560px}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--bd);background:var(--el);border-radius:99px;padding:6px 12px;font-size:13px;color:var(--mu)}
+.stats{display:flex;gap:22px;flex-wrap:wrap;margin-top:18px}
+.stats div{display:flex;flex-direction:column}.stats b{font-size:24px;letter-spacing:-.02em}.stats span{font-size:12.5px;color:var(--mu)}
+.appcard{display:flex;align-items:center;gap:14px;border-color:var(--abd);box-shadow:0 0 0 1px rgba(52,211,153,.06),0 24px 60px var(--sh)}
+.appcard img{width:64px;height:64px;border-radius:22%;flex:0 0 64px;box-shadow:0 10px 30px rgba(14,90,220,.35)}
+.appcard .x{flex:1;min-width:0}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 10px}
+.tabs button{border:1px solid var(--bd);background:var(--el);color:var(--mu);font:inherit;font-weight:700;font-size:13px;padding:8px 13px;border-radius:12px;cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--tint);border-color:var(--vi);color:var(--vt)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1.5px dashed var(--bd2);border-radius:16px;padding:26px 14px;text-align:center;cursor:pointer;color:var(--mu)}
+.drop.on{border-color:var(--vi);background:var(--tint)}
+.res{margin-top:12px;border-left:4px solid var(--bd2)}
+.res.dangerous{border-left-color:var(--rd)}.res.suspicious{border-left-color:var(--ye)}.res.low{border-left-color:var(--gr)}
+.meter{height:8px;border-radius:9px;background:var(--bd);overflow:hidden;margin:10px 0}
+.meter i{display:block;height:100%;border-radius:9px;transition:width .5s}
+ul.li{list-style:none;margin-top:6px}ul.li li{position:relative;padding-left:18px;margin:4px 0}ul.li li::before{content:"";position:absolute;left:4px;top:.62em;width:6px;height:6px;border-radius:50%;background:var(--bd2)}
+ol.st{margin:6px 0 0 20px}ol.st li{margin:3px 0}
+.sh{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.quiz{max-width:760px}
+.qtop{display:flex;align-items:center;gap:10px;justify-content:space-between;margin-bottom:10px}
+.prog{height:6px;border-radius:9px;background:var(--bd);overflow:hidden;margin:4px 0 14px}.prog i{display:block;height:100%;background:var(--vi);transition:width .3s}
+.qq{font-size:18px;font-weight:650;line-height:1.4}
+.opts{display:grid;gap:8px;margin-top:14px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;border:1px solid var(--bd);background:var(--el);color:var(--tx);font:inherit;font-size:15px;padding:13px 14px;border-radius:14px;cursor:pointer;transition:border-color .2s,background .2s}
+.opt:hover:not(:disabled){border-color:var(--vi)}
+.opt b{flex:0 0 26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;background:var(--bd);font-size:13px}
+.opt.ok{border-color:var(--gr);background:rgba(52,211,153,.1)}.opt.ok b{background:var(--gr);color:#04130d}
+.opt.no{border-color:var(--rd);background:rgba(239,68,68,.1)}.opt.no b{background:var(--rd);color:#fff}
+.opt:disabled{cursor:default}
+.fb{margin-top:12px;border-radius:14px;padding:12px 14px;border:1px solid var(--bd)}
+.fb.ok{border-color:var(--gr)}.fb.no{border-color:var(--rd)}
+.score{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.ring{width:110px;height:110px}
+.mist{margin-top:12px;border-top:1px solid var(--bd);padding-top:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.kb{cursor:pointer;transition:border-color .2s,transform .15s;display:flex;flex-direction:column;gap:4px}
+.kb:hover{border-color:var(--bd2)}
+.kb .ic{font-size:24px}
+.kb[aria-expanded=true]{grid-column:1/-1;border-color:var(--vi)}
+.kb .more{display:none;margin-top:8px}.kb[aria-expanded=true] .more{display:block}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 14px}
+.chips button{border:1px solid var(--bd);background:var(--el);color:var(--mu);font:inherit;font-size:13px;font-weight:600;padding:6px 12px;border-radius:99px;cursor:pointer}
+.chips button[aria-pressed=true]{border-color:var(--vi);background:var(--tint);color:var(--vt)}
+.tips{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-top:12px}
+.tip{border:1px solid var(--bd);border-radius:16px;padding:14px;background:var(--el);font-size:14px}
+.tip::before{content:"💡";display:block;font-size:18px;margin-bottom:4px}
+.chat{display:flex;flex-direction:column;height:min(560px,72vh)}
+.log{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px 2px 10px}
+.m{max-width:86%;padding:10px 13px;border-radius:16px;white-space:pre-wrap;word-break:break-word;font-size:14px}
+.m.u{margin-left:auto;background:var(--vi);color:#fff}.m.a{background:var(--el);border:1px solid var(--bd)}
+.eng{font-size:11.5px;color:var(--mu);margin:-4px 0 2px 4px;display:flex;align-items:center;gap:6px}
+.eng i{width:7px;height:7px;border-radius:50%;background:var(--gr);flex:0 0 7px}.eng.cl i{background:var(--vi)}
+/* инструменты */
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.anat{display:flex;flex-wrap:wrap;gap:4px;margin-top:12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px}
+.anat span{display:inline-flex;flex-direction:column;border-radius:10px;padding:5px 8px;background:var(--el);border:1px solid var(--bd);word-break:break-all}
+.anat small{font-family:Inter,system-ui,sans-serif;font-size:10.5px;color:var(--mu);font-weight:600;white-space:nowrap}
+.anat .own{border-color:var(--vi);background:var(--tint);color:var(--vt);font-weight:700}
+.anat .bad{border-color:var(--rd);background:rgba(239,68,68,.1)}
+.fnd{list-style:none;margin-top:10px}.fnd li{display:flex;gap:8px;margin:6px 0;font-size:14px}.fnd li b{flex:0 0 auto}
+.pwm{display:flex;gap:4px;margin:12px 0 6px}.pwm i{flex:1;height:8px;border-radius:9px;background:var(--bd);transition:background .3s}
+/* «Если вас обманули» */
+.sos{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.sos .c{position:relative;padding-top:22px}
+.sos .n{position:absolute;top:-12px;left:16px;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#f87171,#dc2626);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 6px 16px rgba(220,38,38,.35)}
+.sos .ic{font-size:26px;display:block;margin-bottom:6px}
+#sits{align-items:start}.sit{cursor:pointer}.sit[aria-expanded=true]{border-color:var(--rd)}
+.sit .more{display:none;margin-top:8px}.sit[aria-expanded=true] .more{display:block}
+.call{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px;border-color:rgba(239,68,68,.45);background:rgba(239,68,68,.07)}
+.news{border-bottom:1px solid var(--bd);background:var(--tint)}.news .wrap{display:flex;gap:12px;align-items:center;padding-top:10px;padding-bottom:10px}
+.news .nwx{flex:1;min-width:0;font-size:14px}.news .nwx b{margin-right:6px}.news ul{margin:6px 0 0;padding-left:18px;font-size:13px;color:var(--mu)}.news li{margin:2px 0}
+footer .ver{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px 14px}
+footer{margin-top:50px;border-top:1px solid var(--bd);padding:26px 0 calc(30px + env(safe-area-inset-bottom));color:var(--mu);font-size:13px}
+footer .row{justify-content:space-between}
+#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translate(-50%,calc(100% + 40px));visibility:hidden;z-index:60;max-width:min(560px,calc(100% - 24px));padding:12px 16px;border-radius:16px;background:var(--pn);border:1px solid var(--bd);box-shadow:0 18px 50px var(--sh);transition:transform .3s,visibility .3s}
+#toast.on{transform:translate(-50%,0);visibility:visible}
+/* нижнее меню на телефоне */
+nav.bn{display:none}
+.hide{display:none!important}
+.emb .no-emb{display:none!important}
+.only-emb{display:none!important}.emb .only-emb{display:inline-flex!important}
+.skip{position:absolute;left:-999px}.skip:focus{left:12px;top:12px;z-index:99;background:var(--pn);padding:8px 12px;border-radius:10px}
+@media(max-width:960px){.sos{grid-template-columns:1fr 1fr;row-gap:22px}}
+@media(max-width:880px){.hero{grid-template-columns:1fr}nav.nv{display:none}.tgrid{grid-template-columns:1fr}
+  nav.bn{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--hd);backdrop-filter:blur(14px);border-top:1px solid var(--bd);padding:4px max(4px,env(safe-area-inset-left)) calc(4px + env(safe-area-inset-bottom)) max(4px,env(safe-area-inset-right))}
+  nav.bn a{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;text-decoration:none;color:var(--mu);font-size:10.5px;font-weight:700;padding:5px 2px;border-radius:12px;min-width:0}
+  nav.bn a span{font-size:19px;line-height:1.1}nav.bn a.on{color:var(--vt);background:var(--tint)}
+  body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}#toast{bottom:calc(76px + env(safe-area-inset-bottom))}}
+.cta .f{display:none}   /* в шапке - короткая надпись: полная кнопка есть в карточке приложения */
+@media(max-width:560px){.tb{gap:6px}.brand span{display:none}.hide-sm{display:none!important}.b.cta{padding:8px 12px;font-size:13px}.ib{width:38px;min-height:38px}section{padding-top:34px}
+  .appcard{flex-direction:column;align-items:flex-start}.appcard img{width:52px;height:52px;flex-basis:52px}.sos{grid-template-columns:1fr}.stats{gap:16px}}
+@supports (-webkit-touch-callout:none){input,textarea{font-size:16px}}
+@media(max-width:370px){header .b.cta{display:none}}   /* узкий экран: «Открыть приложение» есть в карточке приложения */
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+/* ---- 1.6: шкала риска, подсветка фраз, облачная оценка ---- */
+.rhd{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.gg{position:relative;flex:0 0 132px;width:132px;height:80px}
+.gg svg{width:132px;height:76px;display:block}
+.gt,.gv{fill:none;stroke-width:11;stroke-linecap:round}
+.gt{stroke:var(--bd)}
+.gv{stroke-dasharray:100 100;animation:gIn 1s cubic-bezier(.2,.8,.2,1) both}
+@keyframes gIn{from{stroke-dashoffset:100}}
+.ggn{position:absolute;left:0;right:0;bottom:2px;text-align:center;line-height:1.05}
+.ggn b{font-size:26px;letter-spacing:-.02em}.ggn small{font-size:14px;margin-left:1px}.ggn span{display:block;font-size:11.5px;color:var(--mu)}
+.rhx{flex:1;min-width:180px;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.rhx .t{font-size:14px;padding:4px 12px}
+.src{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--mu)}
+.src.cl{color:var(--vt)}
+.hl{margin-top:8px;padding:12px 14px;border-radius:14px;background:var(--bg);border:1px solid var(--bd);line-height:1.75;white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px}
+.hl mark{color:inherit;border-radius:6px;padding:1px 3px;cursor:help;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.hl mark.hr{background:rgba(239,68,68,.22);box-shadow:inset 0 -2px 0 var(--rd)}
+.hl mark.ho{background:rgba(251,146,60,.2);box-shadow:inset 0 -2px 0 #fb923c}
+.hl mark.hy{background:rgba(251,191,36,.18);box-shadow:inset 0 -2px 0 var(--ye)}
+.hl mark.hg{background:rgba(52,211,153,.14);box-shadow:inset 0 -2px 0 var(--gr)}
+.hll{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.hlk{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:4px 10px;border-radius:99px;border:1px solid var(--bd);background:var(--el)}
+.hlk::before{content:"";width:9px;height:9px;border-radius:3px;flex:0 0 9px}
+.hlk.hr::before{background:var(--rd)}.hlk.ho::before{background:#fb923c}.hlk.hy::before{background:var(--ye)}
+.cbx{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:12px;padding:12px;border:1px dashed var(--bd2);border-radius:14px}
+.cbx .mu{font-size:12.5px;flex:1;min-width:200px}
+.cai{margin-top:12px;padding:12px 14px;border-radius:14px;border:1px solid var(--vi);background:var(--tint);white-space:pre-wrap;overflow-wrap:anywhere;font-size:14.5px}
+.cai b{display:block;margin-bottom:4px;color:var(--vt)}
+.spn{display:inline-block;width:.9em;height:.9em;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-.12em}
+@keyframes spin{to{transform:rotate(360deg)}}
+.m.rk{max-width:86%;background:var(--pn);border:1px solid var(--bd)}
+.rks{font-size:11.5px;color:var(--mu);margin-top:4px}
+/* ---- звонок ---- */
+.cch{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.cch button{border:1px solid var(--bd);background:var(--el);color:var(--tx);font:inherit;font-size:13.5px;padding:8px 12px;border-radius:99px;cursor:pointer;min-height:40px}
+.cch button[aria-pressed=true]{border-color:var(--vi);background:var(--tint);color:var(--vt)}
+/* ---- новые схемы ---- */
+.scp{display:flex;align-items:center;gap:10px;min-width:220px}
+.scp .bar{flex:1;height:8px;border-radius:9px;background:var(--bd);overflow:hidden}.scp .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--vi),var(--gr));transition:width .5s}
+.scp span{font-size:13px;color:var(--mu);white-space:nowrap}
+.scg{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.scc{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:8px;text-align:left;font:inherit;color:var(--tx);background:var(--cd);border:1px solid var(--bd);border-radius:20px;padding:16px;cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s}
+.scc:hover{transform:translateY(-2px);border-color:var(--vi);box-shadow:0 14px 30px -14px var(--vi)}
+.scc .sci{font-size:26px;line-height:1}.scc b{font-size:16px;line-height:1.3}
+.scc .scs{margin-top:auto;font-size:12.5px;font-weight:700;color:var(--vt)}
+.scc.done{border-color:rgba(52,211,153,.45)}.scc.done .scs{color:var(--gr)}
+.scc[aria-expanded=true]{border-color:var(--vi);box-shadow:0 0 0 1px var(--vi)}
+.scm{margin-top:14px;animation:scIn .35s cubic-bezier(.2,.8,.2,1)}
+@keyframes scIn{from{opacity:0;transform:translateY(8px)}}
+.scst{display:flex;gap:6px;margin:4px 0 14px}.scst i{flex:1;height:5px;border-radius:9px;background:var(--bd)}.scst i.on{background:var(--vi)}
+.sbub{border-radius:18px 18px 18px 6px;padding:12px 14px;background:var(--el);border:1px solid var(--bd);max-width:560px;line-height:1.6;font-size:15.5px;overflow-wrap:anywhere}
+.sbub .sfrom{display:block;font-size:12px;color:var(--mu);margin-bottom:4px}
+.sfr{display:inline;color:inherit;background:rgba(251,191,36,.1);border-bottom:2px dashed var(--ye);border-radius:6px;padding:1px 3px;cursor:pointer;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.sfr:focus-visible{outline:2px solid var(--vi);outline-offset:1px}
+.sfr.on{background:rgba(239,68,68,.22);border-bottom:2px solid var(--rd);animation:pop .3s}
+@keyframes pop{50%{transform:scale(1.06)}}
+.sopt{display:grid;gap:8px;margin-top:10px}
+.sopt button{text-align:left;font:inherit;color:var(--tx);background:var(--el);border:1px solid var(--bd);border-radius:14px;padding:13px 14px;cursor:pointer;min-height:48px}
+.sopt button.ok{border-color:var(--gr);background:rgba(52,211,153,.12)}.sopt button.no{border-color:var(--rd);background:rgba(239,68,68,.1)}
+.scok{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--gr);margin-top:10px}
+/* ---- цифры ---- */
+.nmg{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.nmt b{display:block;font-size:clamp(28px,6vw,38px);letter-spacing:-.02em;line-height:1.1}.nmt span{color:var(--mu);font-size:14px}
+.nmb{grid-column:1/-1}
+.bars{display:grid;gap:12px;margin-top:10px;position:relative}
+.brw{display:grid;grid-template-columns:minmax(0,1fr) 54px;gap:4px 10px;align-items:center}
+.brw .bl{grid-column:1/-1;font-size:14px}
+.brt{position:relative;height:12px;border-radius:4px;background:repeating-linear-gradient(90deg,transparent 0 calc(33.333% - 1px),var(--bd) calc(33.333% - 1px) 33.333%)}
+.brt i{position:absolute;left:0;top:0;bottom:0;border-radius:0 4px 4px 0;background:var(--vi);transform-origin:left;animation:brIn .9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes brIn{from{transform:scaleX(0)}}
+.brw:hover .brt i,.brw:focus-within .brt i{filter:brightness(1.2)}
+.brv{font-weight:700;font-size:14px;text-align:right}
+.bax{display:grid;grid-template-columns:minmax(0,1fr) 54px;gap:10px;font-size:11.5px;color:var(--mu)}.bax div{display:flex;justify-content:space-between}
+.btip{position:absolute;z-index:5;left:0;max-width:100%;pointer-events:none;padding:7px 10px;border-radius:10px;background:var(--pn);border:1px solid var(--bd2);box-shadow:0 10px 24px var(--sh);font-size:12.5px;transform:translateY(-110%)}
+.nms{font-size:12px;margin-top:10px}
+/* ---- словарь ---- */
+.gls{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.gls button{border:1px dashed var(--bd2);background:none;color:var(--tx);font:inherit;font-size:13.5px;padding:7px 12px;border-radius:99px;cursor:pointer}
+.gls button[aria-expanded=true]{border-style:solid;border-color:var(--vi);background:var(--tint);color:var(--vt)}
+.gld{margin-top:10px;padding:12px 14px;border-radius:14px;border:1px solid var(--bd);background:var(--el);font-size:14.5px;animation:scIn .25s}
+/* ---- тур для новичков ---- */
+.tour-on{outline:3px solid var(--vi);outline-offset:6px;border-radius:16px;animation:tPulse 1.6s ease-in-out infinite}
+@keyframes tPulse{50%{outline-color:transparent}}
+#tour{position:fixed;z-index:70;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(440px,calc(100% - 24px));padding:16px;border-radius:20px;background:var(--pn);border:1px solid var(--vi);box-shadow:0 24px 60px var(--sh);animation:scIn .3s}
+#tour[hidden]{display:none}
+#tour p{margin:6px 0 12px;line-height:1.5}
+#tour .row{justify-content:space-between}
+.tdots{display:flex;gap:5px}.tdots i{width:7px;height:7px;border-radius:50%;background:var(--bd2)}.tdots i.on{background:var(--vi)}
+@media(max-width:880px){#tour{bottom:calc(76px + env(safe-area-inset-bottom))}}
+@media(prefers-reduced-motion:reduce){.gv,.brt i,.tour-on,.scm,.sfr.on{animation:none}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main" data-t="skip">Перейти к содержимому</a>
+<header class="top"><div class="wrap tb">
+  <a class="b sm only-emb" href="../index.html" id="backApp" data-t="backApp">← В приложение</a>
+  <a class="brand" href="#top" aria-label="CheckLink"><img src="assets/logo-64.png" alt="" width="34" height="34"><span>CheckLink</span></a>
+  <nav class="nv" aria-label="Разделы"><a href="#check" data-t="nCheck">Проверка</a><a href="#tools" data-t="nTools">Инструменты</a><a href="#trainer" data-t="nTrainer">Тренажёр</a><a href="#schemes" data-t="nSch">Новые схемы</a><a href="#kb" data-t="nKb">База знаний</a><a href="#ask" data-t="nAsk">QuasarAI</a><a href="#help" data-t="nHelp">Если обманули</a></nav>
+  <span class="sp"></span>
+  <div class="seg" role="group" aria-label="Язык / Тіл / Language" id="langs"><button data-lang="ru">RU</button><button data-lang="kk">KZ</button><button data-lang="en">EN</button></div>
+  <button class="b ib" id="thB" data-a="theme" aria-label="Тема" title="Тема">◐</button>
+  <button class="b bv cta no-emb" data-a="openApp"><span class="f" data-t="openApp">Открыть приложение CheckLink</span><span class="s" data-t="openAppS">Приложение</span></button>
+</div></header>
+
+<div class="news no-emb" id="news" role="region" aria-labelledby="newsT" hidden><div class="wrap">
+  <span class="t v">1.8</span>
+  <div class="nwx"><b id="newsT" data-t="newsT">Новое в CheckLink 1.8</b><span data-t="newsD">Вторая линия защиты в браузере и на телефоне, вход по нику и шифрование личных данных.</span>
+    <details><summary class="mu" style="font-size:13px;cursor:pointer" data-t="newsMore">Что изменилось</summary><ul><li data-t="news1"></li><li data-t="news2"></li><li data-t="news3"></li><li data-t="news4"></li></ul></details></div>
+  <button class="b sm ib" data-a="newsX" aria-label="✕" title="✕">✕</button>
+</div></div>
+<main id="main">
+<div class="wrap">
+  <div class="hero" id="top">
+    <div>
+      <span class="t v" data-t="badge">Без установки · без регистрации · бесплатно</span>
+      <h1 style="margin-top:12px"><span data-t="h1a">Проверьте ссылку, сообщение или файл</span> <span class="grad" data-t="h1b">до того, как станет поздно</span></h1>
+      <p class="lead" data-t="lead">CheckLink оценивает риск по признакам мошенничества: поддельные сайты Kaspi, Halyk и eGov, «служба безопасности банка», «родственник в беде», опасные APK. Всё считается прямо в вашем браузере — ничего не отправляется.</p>
+      <div class="row"><a class="b bv" href="#check" data-t="ctaCheck">Проверить сейчас</a><a class="b" href="#trainer" data-t="ctaTrain">Пройти тренажёр</a><a class="b br" href="#help" data-t="ctaHelp">🆘 Меня обманули</a></div>
+      <div class="pills" style="margin-top:16px"><span class="pill">🔒 <span data-t="p1">Проверка в браузере</span></span><span class="pill">🤖 <span data-t="p2">QuasarAI без платных API</span></span><span class="pill">🇰🇿 <span data-t="p3">Русский · Қазақша · English</span></span></div>
+      <div class="stats" id="stats" aria-live="polite"></div>
+    </div>
+    <div class="c appcard no-emb" role="region" aria-labelledby="apT">
+      <img src="assets/logo-192.png" alt="" width="64" height="64">
+      <div class="x"><h3 id="apT" data-t="apT">Приложение CheckLink</h3><p class="mu" data-t="apD">Проверяйте сообщения прямо из WhatsApp и Telegram: «Поделиться» → «Проверить в CheckLink». Сканер QR, Щит и чат QuasarAI всегда под рукой.</p>
+        <div class="row" style="margin-top:10px"><button class="b bv" data-a="openApp"><span data-t="openApp">Открыть приложение CheckLink</span></button><a class="b sm" id="apDl" href="download" hidden><span data-t="apDl">Скачать APK</span> <span id="apDlV"></span></a><a class="b sm" id="webApp" href="app/" data-t="webApp">Веб-версия</a><button class="b sm bs" id="pwaB" data-a="pwa" hidden><span data-t="pwa">Установить без APK</span></button></div>
+        <p class="mu" id="apHint" style="font-size:12px;margin-top:6px"></p></div>
+    </div>
+  </div>
+
+  <section id="check" aria-labelledby="ckH">
+    <div class="sh"><div><h2 id="ckH" data-t="ckH">Экспресс-проверка</h2><p class="mu" data-t="ckD">Ссылка, текст СМС или сообщения, файл или QR-код с фото. Результат — оценка риска, а не гарантия.</p></div></div>
+    <div class="c">
+      <div class="tabs" role="tablist" aria-label="Что проверить">
+        <button role="tab" data-ck="link" aria-selected="true" data-t="tLink">🔗 Ссылка</button><button role="tab" data-ck="sms" aria-selected="false" data-t="tSms">💬 Сообщение</button><button role="tab" data-ck="call" aria-selected="false" data-t="tCall">📞 Звонок</button><button role="tab" data-ck="file" aria-selected="false" data-t="tFile">📄 Файл</button><button role="tab" data-ck="qr" aria-selected="false" data-t="tQr">▦ QR с фото</button>
+      </div>
+      <div data-pane="link"><div class="row" style="flex-wrap:nowrap"><input id="ckLink" inputmode="url" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="https://…" aria-label="Ссылка"><button class="b bv" data-a="ckLink" data-t="check" style="flex:0 0 auto">Проверить</button></div>
+        <div class="row" style="margin-top:8px"><button class="b sm bs clip hide" data-a="pasteLink" data-t="paste">📋 Вставить</button><span class="mu" style="font-size:13px" data-t="try">Попробуйте:</span><button class="b sm" data-ex="kaspi-secure.top/482">kaspi-secure.top</button><button class="b sm" data-ex="https://kaspi.kz/">kaspi.kz</button><button class="b sm" data-ex="http://192.168.4.20/halyk/login">192.168.4.20/halyk</button></div></div>
+      <div data-pane="sms" class="hide"><textarea id="ckSms" rows="4" maxlength="4000" placeholder="Вставьте текст сообщения" aria-label="Текст сообщения"></textarea><div class="row" style="margin-top:8px"><button class="b bv" data-a="ckSms" data-t="check">Проверить</button><button class="b sm bs clip hide" data-a="pasteSms" data-t="paste">📋 Вставить</button><button class="b sm" data-exs="0" data-t="exs1">Пример: «служба безопасности»</button><button class="b sm" data-exs="1" data-t="exs2">Пример: «родственник»</button></div></div>
+      <div data-pane="call" class="hide"><p class="mu" data-t="callD">Опишите, что говорил звонящий, — оценим сам разговор, а не только номер. Нажмите на подходящие фразы или напишите своими словами.</p>
+        <div class="cch" id="callCh"></div>
+        <textarea id="ckCall" rows="3" maxlength="4000" aria-label="Что говорил звонящий"></textarea>
+        <div class="row" style="margin-top:8px"><button class="b bv" data-a="ckCall" data-t="check">Проверить</button><button class="b sm" data-a="callClr" data-t="clear">Очистить</button></div></div>
+      <div data-pane="file" class="hide"><label class="drop" id="drop" tabindex="0"><span style="font-size:26px">📄</span><b data-t="fileH">Выберите или перетащите файл</b><span class="mu" style="font-size:13px" data-t="fileD">Файл не загружается на сервер: проверяются имя и первые байты прямо в браузере.</span><input type="file" id="ckFile" class="hide"></label></div>
+      <div data-pane="qr" class="hide"><label class="drop" id="dropQr" tabindex="0"><span style="font-size:26px">▦</span><b data-t="qrH">Выберите фото или скриншот с QR-кодом</b><span class="mu" style="font-size:13px" data-t="qrD">Код распознаётся в браузере, затем содержимое проверяется как ссылка.</span><input type="file" id="ckQr" accept="image/*" class="hide"></label></div>
+      <div id="ckOut" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section id="tools" aria-labelledby="toH">
+    <div class="sh"><div><h2 id="toH" data-t="toH">Инструменты</h2><p class="mu" data-t="toD">Разберите адрес сайта по частям и проверьте надёжность пароля — прямо в браузере, ничего не отправляется.</p></div></div>
+    <div class="tgrid">
+      <div class="c"><h3 data-t="anH">🔎 Разбор адреса</h3><p class="mu" data-t="anD">Кому на самом деле принадлежит ссылка. Владелец — это часть прямо перед зоной (.kz, .com), а не слова в начале адреса.</p>
+        <div class="row" style="flex-wrap:nowrap;margin-top:10px"><input id="anIn" inputmode="url" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="kaspi.kz.bonus-online.top/login" aria-label="Адрес сайта"><button class="b bv" data-a="anGo" data-t="anGo" style="flex:0 0 auto">Разобрать</button></div>
+        <div class="row" style="margin-top:8px"><span class="mu" style="font-size:13px" data-t="try">Попробуйте:</span><button class="b sm" data-an="https://kaspi.kz.bonus-online.top/login?id=7">kaspi.kz.bonus-online.top</button><button class="b sm" data-an="https://egov.kz@egov-pay.site/oplata">egov.kz@…</button><button class="b sm" data-an="https://homebank.kz/">homebank.kz</button></div>
+        <div id="anOut" aria-live="polite"></div></div>
+      <div class="c"><h3 data-t="pwH">🔑 Надёжность пароля</h3><p class="mu" data-t="pwD">Пароль проверяется только в этом браузере и никуда не отправляется.</p>
+        <div class="row" style="flex-wrap:nowrap;margin-top:10px"><input id="pwIn" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="128" placeholder="Введите пароль" aria-label="Пароль"><button class="b ib" data-a="pwEye" id="pwEye" aria-label="Показать пароль" title="Показать пароль">👁</button></div>
+        <div id="pwOut" aria-live="polite"><p class="mu" style="margin-top:10px;font-size:13px" data-t="pwHint">Хороший пароль: от 12 символов, буквы разного регистра, цифры и символы, без имён, дат и слов из словаря. Для каждого сайта — свой.</p></div>
+        <div class="row" style="margin-top:10px"><button class="b sm bs" data-a="pwGen" data-t="pwGen">⚡ Сгенерировать надёжный</button></div></div>
+    </div>
+  </section>
+
+  <section id="trainer" aria-labelledby="trH">
+    <div class="sh"><div><h2 id="trH" data-t="trH">Тренажёр кибербезопасности</h2><p class="mu" data-t="trD">QuasarAI собирает случайные ситуации: фишинг, фейковые сайты, социальная инженерия, вредоносные файлы. Ответ проверяется сразу, с разбором ошибок.</p></div></div>
+    <div class="c quiz" id="quiz"></div>
+  </section>
+
+  <section id="schemes" aria-labelledby="scH">
+    <div class="sh"><div><h2 id="scH" data-t="scH">Новые схемы мошенничества</h2><p class="mu" data-t="scD">Короткие модули по свежим схемам: найдите подвох в настоящем сценарии, выберите действие и запомните главное. Около 2 минут на модуль.</p></div><div class="scp" id="scProg"></div></div>
+    <div class="scg" id="scGrid"></div>
+    <div class="c scm hide" id="scMod" aria-live="polite"></div>
+  </section>
+
+  <section id="numbers" aria-labelledby="nmH">
+    <div class="sh"><div><h2 id="nmH" data-t="nmH">Мошенничество в цифрах</h2><p class="mu" data-t="nmD">Официальная статистика Казахстана за январь–ноябрь 2025 года: интернет-мошенничество растёт, а самые частые схемы — те, которые проверяет CheckLink.</p></div></div>
+    <div class="nmg" id="nmGrid"></div>
+  </section>
+
+  <section id="kb" aria-labelledby="kbH">
+    <div class="sh"><div><h2 id="kbH" data-t="kbH">База знаний</h2><p class="mu" data-t="kbD">Как работают схемы обмана и что делать — коротко и понятно.</p></div><input id="kbQ" type="search" placeholder="Поиск: Kaspi, QR, WhatsApp…" aria-label="Поиск по базе знаний" style="max-width:320px"></div>
+    <div class="chips" id="kbCats" role="group" aria-label="Категории"></div>
+    <div class="grid" id="kbGrid"></div>
+    <h3 style="margin-top:26px" data-t="tipsH">Полезные советы</h3>
+    <div class="tips" id="tips"></div>
+    <button class="b sm" data-a="moreTips" style="margin-top:10px" data-t="moreTips">Другие советы</button>
+    <h3 style="margin-top:26px" data-t="glH">Словарь: что значат эти слова</h3>
+    <div class="gls" id="gls"></div><div id="gld"></div>
+  </section>
+
+  <section id="ask" aria-labelledby="askH">
+    <div class="sh"><div><h2 id="askH" data-t="askH">Спросите QuasarAI</h2><p class="mu" data-t="askD">Помощник CheckLink: вставьте подозрительное сообщение или задайте вопрос. Без регистрации и платных сервисов.</p></div></div>
+    <div class="c chat">
+      <div class="log" id="log" aria-live="polite"></div>
+      <div class="row" id="askEx" style="margin-bottom:8px"></div>
+      <div class="row" style="flex-wrap:nowrap"><textarea id="askQ" rows="1" maxlength="4000" placeholder="Вопрос или текст сообщения…" aria-label="Вопрос"></textarea><button class="b bv" data-a="ask" aria-label="Отправить" style="flex:0 0 52px">➤</button></div>
+      <label class="mu ccb" style="display:flex;gap:8px;align-items:flex-start;margin-top:8px;font-size:13px"><input type="checkbox" id="cloudOk" style="margin-top:3px;flex:0 0 auto"><span data-t="cloudOk">Использовать облачный ИИ Google Gemini. Текст уйдёт за пределы Казахстана; номера карт и телефонов, ИИН, коды и пароли из него удаляются. Без галочки отвечает QuasarAI в браузере.</span></label>
+    </div>
+  </section>
+
+  <section id="help" aria-labelledby="hpH">
+    <div class="sh"><div><h2 id="hpH" data-t="hpH">🆘 Если вас обманули</h2><p class="mu" data-t="hpD">Действуйте сразу: от первых минут зависит, удастся ли остановить списание. Звоните только по официальным номерам — с обратной стороны карты или из приложения банка.</p></div></div>
+    <div class="sos" id="sos"></div>
+    <h3 style="margin-top:26px" data-t="hpSit">Что случилось?</h3>
+    <div class="grid" id="sits" style="margin-top:10px"></div>
+    <div class="c call"><span style="font-size:28px" aria-hidden="true">📞</span><div style="flex:1;min-width:200px"><b data-t="hpCall">Полиция — 102, единый номер экстренных служб — 112</b><p class="mu" style="font-size:13px" data-t="hpCallD">Банк — только по номеру с обратной стороны карты или в официальном приложении. Не перезванивайте на номера из сообщений.</p></div><a class="b br" href="tel:102" data-t="hpCallB">Позвонить 102</a></div>
+  </section>
+</div>
+</main>
+
+<footer><div class="wrap">
+  <div class="row"><div><b>CheckLink</b> · <span data-t="foot1">защита от мошенников и киберугроз</span></div>
+    <div class="row"><a href="#check" data-t="nCheck">Проверка</a><a href="#tools" data-t="nTools">Инструменты</a><a href="#trainer" data-t="nTrainer">Тренажёр</a><a href="#kb" data-t="nKb">База знаний</a><a href="#schemes" data-t="nSch">Новые схемы</a><a href="#top" data-a="tour" data-t="tourLink">Как пользоваться сайтом</a><a class="no-emb" id="webApp2" href="app/" data-t="webApp">Веб-версия</a><a class="hide" id="openSite" href="#" data-a="openSite" data-t="openSite">Открыть сайт в браузере</a></div></div>
+  <p style="margin-top:12px" data-t="foot2">Результаты — вероятностная оценка по известным признакам мошенничества, а не гарантия. Сомневаетесь — позвоните в банк по номеру на карте или в полицию (102).</p>
+  <p class="ver no-emb"><span><span data-t="verL">Версия</span> <b id="verN">1.8.0</b></span><a href="privacy" id="privL" data-t="privL">Политика конфиденциальности</a><a href="account/delete" id="delL" data-t="delL">Удалить аккаунт</a><a href="#" data-a="newsShow" data-t="newsT">Новое в CheckLink 1.8</a></p>
+  <p style="margin-top:6px" data-t="foot3">Конфиденциальность: ссылки, сообщения, файлы и пароли проверяются в вашем браузере и никуда не отправляются. Вопросы QuasarAI могут обрабатываться на сервере CheckLink — личные данные из них удаляются.</p>
+</div></footer>
+<nav class="bn" aria-label="Разделы"><a href="#check"><span aria-hidden="true">🔍</span><b data-t="bCheck">Проверка</b></a><a href="#trainer"><span aria-hidden="true">🎯</span><b data-t="bTrainer">Тренажёр</b></a><a href="#kb"><span aria-hidden="true">📚</span><b data-t="bKb">База</b></a><a href="#ask"><span aria-hidden="true">🤖</span><b>QuasarAI</b></a><a href="#help"><span aria-hidden="true">🆘</span><b data-t="bHelp">Помощь</b></a></nav>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="tour" role="dialog" aria-live="polite" aria-labelledby="tourT" hidden></div>
+
+<script src="portal-config.js"></script>
+<script src="quasar-core.js"></script>
+<script>
+'use strict';
+const PC=Object.assign({server:'',webAppUrl:'app/',appScheme:'checklink',androidPackage:'com.quasar.shield',appDownloadUrl:'',embedded:false,appUrl:'../index.html'},window.CHECKLINK_PORTAL||{});
+const EMB=!!PC.embedded;                                  // страница открыта внутри приложения CheckLink (www/portal)
+if(EMB)document.documentElement.classList.add('emb');
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LS=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}};
+const SS=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const LANGS=['ru','kk','en'];
+let LANG=(()=>{const s=LS('cl_site_lang','')||(EMB?LS('qa_lang','').replace(/"/g,''):'');if(LANGS.includes(s))return s;const n=(navigator.language||'ru').slice(0,2).toLowerCase();return n==='kk'?'kk':n==='en'?'en':'ru'})();
+const capPlug=n=>{try{const c=window.Capacitor;return c&&c.Plugins&&c.Plugins[n]||null}catch(e){return null}};
+
+/* ---------------- тексты интерфейса: [ru, kk, en] ---------------- */
+const T={
+  skip:['Перейти к содержимому','Мазмұнға өту','Skip to content'],
+  nCheck:['Проверка','Тексеру','Check'],nTools:['Инструменты','Құралдар','Tools'],nTrainer:['Тренажёр','Жаттықтырғыш','Trainer'],nKb:['База знаний','Білім базасы','Knowledge base'],nAsk:['QuasarAI','QuasarAI','QuasarAI'],nHelp:['Если обманули','Алданып қалсаңыз','If scammed'],
+  bCheck:['Проверка','Тексеру','Check'],bTrainer:['Тренажёр','Жаттығу','Trainer'],bKb:['База','База','Library'],bHelp:['Помощь','Көмек','Help'],
+  backApp:['← В приложение','← Қолданбаға','← Back to app'],openSite:['Открыть сайт в браузере','Сайтты браузерде ашу','Open the site in a browser'],
+  openApp:['Открыть приложение CheckLink','CheckLink қолданбасын ашу','Open the CheckLink app'],openAppS:['Приложение','Қолданба','App'],
+  badge:['Без установки · без регистрации · бесплатно','Орнатусыз · тіркелусіз · тегін','No install · no sign-up · free'],
+  h1a:['Проверьте ссылку, сообщение или файл','Сілтемені, хабарламаны немесе файлды тексеріңіз','Check a link, message or file'],
+  h1b:['до того, как станет поздно','кеш болмай тұрып','before it’s too late'],
+  lead:['CheckLink оценивает риск по признакам мошенничества: поддельные сайты Kaspi, Halyk и eGov, «служба безопасности банка», «родственник в беде», опасные APK. Всё считается прямо в вашем браузере — ничего не отправляется.',
+    'CheckLink тәуекелді алаяқтық белгілері бойынша бағалайды: Kaspi, Halyk және eGov жалған сайттары, «банктің қауіпсіздік қызметі», «туысқан қиын жағдайда», қауіпті APK. Барлығы тікелей браузеріңізде есептеледі — ештеңе жіберілмейді.',
+    'CheckLink rates the risk using known fraud signs: fake Kaspi, Halyk and eGov sites, “bank security” calls, “relative in trouble”, dangerous APKs. Everything runs right in your browser — nothing is sent anywhere.'],
+  ctaCheck:['Проверить сейчас','Қазір тексеру','Check now'],ctaTrain:['Пройти тренажёр','Жаттықтырғыштан өту','Try the trainer'],ctaHelp:['🆘 Меня обманули','🆘 Мені алдады','🆘 I’ve been scammed'],
+  p1:['Проверка в браузере','Браузерде тексеру','Checks in your browser'],p2:['QuasarAI без платных API','Ақылы API-сыз QuasarAI','QuasarAI with no paid APIs'],p3:['Русский · Қазақша · English','Русский · Қазақша · English','Русский · Қазақша · English'],
+  stTop:[['тема в базе знаний','темы в базе знаний','тем в базе знаний'],['тақырып білім базасында'],['knowledge base topics']],
+  stQuiz:[['ситуация в тренажёре','ситуации в тренажёре','ситуаций в тренажёре'],['жаттықтырғыштағы жағдай'],['trainer situations']],
+  stLang:[['язык','языка','языков'],['тіл'],['languages']],
+  apT:['Приложение CheckLink','CheckLink қолданбасы','The CheckLink app'],
+  apD:['Проверяйте сообщения прямо из WhatsApp и Telegram: «Поделиться» → «Проверить в CheckLink». Сканер QR, Щит и чат QuasarAI всегда под рукой.','Хабарламаларды тікелей WhatsApp пен Telegram-нан тексеріңіз: «Бөлісу» → «CheckLink-те тексеру». QR сканері, Қалқан және QuasarAI чаты әрдайым қолыңызда.','Check messages right from WhatsApp and Telegram: “Share” → “Check in CheckLink”. The QR scanner, Shield and QuasarAI chat are always at hand.'],
+  webApp:['Веб-версия','Веб-нұсқа','Web version'],
+  apDl:['Скачать APK','APK жүктеу','Download APK'],
+  newsT:['Новое в CheckLink 1.8','CheckLink 1.8 жаңалықтары','New in CheckLink 1.8'],
+  newsD:['Вторая линия защиты в браузере и на телефоне, вход по нику и шифрование личных данных.','Браузер мен телефондағы екінші қорғаныс желісі, никпен кіру және жеке деректерді шифрлау.','A second line of defence in the browser and on the phone, nickname sign-in and encrypted personal data.'],
+  newsMore:['Что изменилось','Не өзгерді','What changed'],
+  news1:['Модель CheckLink работает прямо в браузере после правил: ловит новые формулировки, опечатки и сленг. Проверена на 5574 настоящих SMS и тысячах обычных фраз из открытых наборов.','CheckLink моделі ережелерден кейін тікелей браузерде жұмыс істейді: жаңа тұжырымдарды, қателер мен сленгті ұстайды. Ашық жинақтардағы 5574 нақты SMS пен мыңдаған кәдімгі сөйлеммен тексерілді.','The CheckLink model runs right in the browser after the rules: it catches new wording, typos and slang. Tested on 5,574 real SMS and thousands of ordinary sentences from open datasets.'],
+  news2:['Просьба знакомого «переведи денег» без других признаков — не тревога, а совет: позвоните ему и проверьте.','Таныстың «ақша аудар» деген өтініші басқа белгілерсіз — дабыл емес, кеңес: қоңырау шалып, тексеріңіз.','A friend asking “send me money” with no other signs is not an alarm but advice: call them and check.'],
+  news3:['Приложение: вход по нику без почты, имя, возраст и чаты шифруются на телефоне. Облачный ИИ — только с вашего согласия.','Қолданба: поштасыз никпен кіру, есім, жас және чаттар телефонда шифрланады. Бұлттық ЖИ — тек келісіміңізбен.','App: nickname sign-in without email; name, age and chats are encrypted on the phone. Cloud AI only with your consent.'],
+  news4:['Сайт теперь и на GitHub Pages: открывается сразу, без ожидания сервера, и работает без интернета после первого визита.','Сайт енді GitHub Pages-те де бар: серверді күтпей бірден ашылады және алғашқы кіруден кейін интернетсіз жұмыс істейді.','The website is now also on GitHub Pages: it opens instantly without waiting for the server and works offline after the first visit.'],
+  pwa:['Установить без APK','APK-сыз орнату','Install without APK'],pwaIos:['На iPhone: «Поделиться» → «На экран «Домой»».','iPhone-да: «Бөлісу» → «Басты экранға қосу».','On iPhone: Share → Add to Home Screen.'],
+  pwaOk:['CheckLink добавлен на главный экран','CheckLink басты экранға қосылды','CheckLink was added to the home screen'],
+  verL:['Версия','Нұсқа','Version'],privL:['Политика конфиденциальности','Құпиялылық саясаты','Privacy policy'],delL:['Удалить аккаунт','Аккаунтты жою','Delete account'],
+  hintAnd:['Если приложения нет на телефоне, сразу скачается его новейшая версия.','Қолданба телефонда болмаса, оның ең жаңа нұсқасы бірден жүктеледі.','If the app isn’t on your phone, its latest version downloads right away.'],
+  hintIos:['На iPhone откроется веб-версия приложения: тот же аккаунт и чаты.','iPhone-да қолданбаның веб-нұсқасы ашылады: сол аккаунт пен чаттар.','On iPhone the web version of the app opens: same account and chats.'],
+  hintDesk:['На компьютере откроется веб-версия приложения: тот же аккаунт и чаты.','Компьютерде қолданбаның веб-нұсқасы ашылады: сол аккаунт пен чаттар.','On a computer the web version of the app opens: same account and chats.'],
+  noApp:['Приложение не открылось — открываем загрузку новой версии','Қолданба ашылмады — жаңа нұсқаны жүктеуді ашамыз','The app didn’t open — opening the download of the latest version'],
+  ckH:['Экспресс-проверка','Жедел тексеру','Express check'],
+  ckD:['Ссылка, текст СМС или сообщения, файл или QR-код с фото. Результат — оценка риска, а не гарантия.','Сілтеме, SMS немесе хабарлама мәтіні, файл немесе фотодағы QR-код. Нәтиже — кепілдік емес, тәуекел бағасы.','A link, SMS or message text, a file or a QR code from a photo. The result is a risk estimate, not a guarantee.'],
+  tLink:['🔗 Ссылка','🔗 Сілтеме','🔗 Link'],tSms:['💬 Сообщение','💬 Хабарлама','💬 Message'],tFile:['📄 Файл','📄 Файл','📄 File'],tQr:['▦ QR с фото','▦ Фотодан QR','▦ QR from photo'],
+  check:['Проверить','Тексеру','Check'],paste:['📋 Вставить','📋 Қою','📋 Paste'],clipEmpty:['Буфер обмена пуст','Алмасу буфері бос','The clipboard is empty'],clipFail:['Браузер не дал прочитать буфер обмена: вставьте текст вручную','Браузер алмасу буферін оқуға рұқсат бермеді: мәтінді қолмен қойыңыз','The browser didn’t allow reading the clipboard: paste the text manually'],
+  smsPh:['Вставьте текст СМС или сообщения из мессенджера','SMS немесе мессенджер хабарламасының мәтінін қойыңыз','Paste the text of an SMS or messenger message'],try:['Попробуйте:','Байқап көріңіз:','Try:'],
+  exs1:['Пример: «служба безопасности»','Мысал: «қауіпсіздік қызметі»','Example: “bank security”'],exs2:['Пример: «родственник»','Мысал: «туысқан»','Example: “relative”'],
+  fileH:['Выберите или перетащите файл','Файлды таңдаңыз немесе сүйреп әкеліңіз','Choose or drop a file'],
+  fileD:['Файл не загружается на сервер: проверяются имя и первые байты прямо в браузере.','Файл серверге жүктелмейді: атауы мен алғашқы байттары тікелей браузерде тексеріледі.','The file isn’t uploaded: its name and first bytes are checked right in the browser.'],
+  qrH:['Выберите фото или скриншот с QR-кодом','QR-коды бар фотоны немесе скриншотты таңдаңыз','Choose a photo or screenshot with a QR code'],
+  qrD:['Код распознаётся в браузере, затем содержимое проверяется как ссылка.','Код браузерде танылады, содан кейін мазмұны сілтеме ретінде тексеріледі.','The code is decoded in the browser, then its content is checked like a link.'],
+  qrNone:['QR-код на изображении не найден. Попробуйте более чёткое фото.','Суретте QR-код табылмады. Анығырақ фото жасап көріңіз.','No QR code found in the image. Try a sharper photo.'],
+  qrLib:['Не удалось загрузить распознавание QR. Проверьте интернет или откройте приложение CheckLink.','QR тану жүктелмеді. Интернетті тексеріңіз немесе CheckLink қолданбасын ашыңыз.','Couldn’t load QR decoding. Check your connection or open the CheckLink app.'],
+  qrGot:['Содержимое QR-кода','QR-код мазмұны','QR code content'],
+  risk:['риск','тәуекел','risk'],why:['Что насторожило','Не күдік тудырды','What raised concern'],todo:['Что делать','Не істеу керек','What to do'],
+  openLink:['Открыть ссылку','Сілтемені ашу','Open link'],copy:['Копировать','Көшіру','Copy'],copied:['Скопировано','Көшірілді','Copied'],
+  official:['официальный домен из списка CheckLink','CheckLink тізіміндегі ресми домен','an official domain on CheckLink’s list'],
+  empty:['Введите ссылку или текст','Сілтемені немесе мәтінді енгізіңіз','Enter a link or text'],
+  local:['Проверено в браузере','Браузерде тексерілді','Checked in your browser'],
+  anatomy:['Разобрать адрес','Мекенжайды талдау','Break down the address'],
+  kbFail:['Не удалось загрузить базу QuasarAI. Обновите страницу.','QuasarAI базасы жүктелмеді. Бетті жаңартыңыз.','Couldn’t load the QuasarAI knowledge base. Reload the page.'],
+  /* инструменты: разбор адреса */
+  toH:['Инструменты','Құралдар','Tools'],
+  toD:['Разберите адрес сайта по частям и проверьте надёжность пароля — прямо в браузере, ничего не отправляется.','Сайт мекенжайын бөлшектеп талдаңыз және құпиясөздің беріктігін тексеріңіз — тікелей браузерде, ештеңе жіберілмейді.','Break a website address into parts and check a password’s strength — right in your browser, nothing is sent.'],
+  anH:['🔎 Разбор адреса','🔎 Мекенжайды талдау','🔎 Address breakdown'],
+  anD:['Кому на самом деле принадлежит ссылка. Владелец — это часть прямо перед зоной (.kz, .com), а не слова в начале адреса.','Сілтеме шын мәнінде кімге тиесілі. Иесі — аймақ (.kz, .com) алдындағы бөлік, мекенжайдың басындағы сөздер емес.','Who really owns a link. The owner is the part right before the zone (.kz, .com), not the words at the start of the address.'],
+  anGo:['Разобрать','Талдау','Analyse'],
+  aProto:['протокол','хаттама','protocol'],aUser:['игнорируется','еленбейді','ignored'],aSub:['поддомены','қосалқы домендер','subdomains'],aOwn:['владелец сайта','сайт иесі','site owner'],aZone:['зона','аймақ','zone'],aPath:['путь','жол','path'],aQuery:['параметры','параметрлер','parameters'],aPort:['порт','порт','port'],
+  fOwner:['Настоящий адрес сайта: {d}','Сайттың нақты мекенжайы: {d}','The real site address: {d}'],
+  fHttps:['Соединение шифруется (https). Это хорошо, но не гарантия: у мошенников тоже бывает https','Байланыс шифрланады (https). Бұл жақсы, бірақ кепілдік емес: алаяқтарда да https болады','The connection is encrypted (https). Good, but not a guarantee: scammers use https too'],
+  fHttp:['Нет шифрования (http): введённые данные можно перехватить','Шифрлау жоқ (http): енгізілген деректерді ұстап алуға болады','No encryption (http): entered data can be intercepted'],
+  fOfficial:['Официальный сайт: {b}','Ресми сайт: {b}','Official site: {b}'],
+  fFake:['Использует название «{b}», но это НЕ официальный сайт. Официальный: {d}','«{b}» атауын пайдаланады, бірақ бұл ресми сайт ЕМЕС. Ресми: {d}','Uses the name “{b}”, but it is NOT the official site. Official: {d}'],
+  fZone:['Зона .{z} часто используется мошенниками для одноразовых сайтов','.{z} аймағын алаяқтар бір реттік сайттар үшін жиі пайдаланады','The .{z} zone is often used by scammers for throwaway sites'],
+  fShort:['Сокращённая ссылка: настоящий адрес скрыт. Не открывайте, если не уверены в отправителе','Қысқартылған сілтеме: нақты мекенжай жасырылған. Жіберушіге сенімді болмасаңыз, ашпаңыз','A shortened link: the real address is hidden. Don’t open it unless you trust the sender'],
+  fIp:['Вместо имени сайта — IP-адрес: так часто выглядят временные мошеннические страницы','Сайт атауының орнына — IP-мекенжай: уақытша алаяқтық беттер жиі осылай көрінеді','An IP address instead of a site name: temporary scam pages often look like this'],
+  fPuny:['Punycode (xn--): в имени могут быть буквы других алфавитов, похожие на латиницу','Punycode (xn--): атауда латынға ұқсас басқа әліпби әріптері болуы мүмкін','Punycode (xn--): the name may contain look-alike letters from other alphabets'],
+  fAt:['Символ @: всё, что до него, браузер пропускает. На самом деле откроется {d}','@ белгісі: оның алдындағының бәрін браузер өткізіп жібереді. Шын мәнінде {d} ашылады','The @ sign: the browser skips everything before it. It will actually open {d}'],
+  fSubs:['Много поддоменов: настоящий адрес спрятан в конце','Қосалқы домендер көп: нақты мекенжай соңында жасырылған','Many subdomains: the real address is hidden at the end'],
+  fApk:['Ссылка скачивает приложение (.apk). Устанавливайте приложения только из Google Play или App Store','Сілтеме қолданбаны (.apk) жүктейді. Қолданбаларды тек Google Play немесе App Store-дан орнатыңыз','The link downloads an app (.apk). Install apps only from Google Play or the App Store'],
+  fBad:['Это не адрес сайта, а команда (javascript:, data: и т.п.). Не открывайте','Бұл сайт мекенжайы емес, команда (javascript:, data: т.б.). Ашпаңыз','This is not a website address but a command (javascript:, data: etc.). Don’t open it'],
+  fErr:['Не похоже на адрес сайта','Сайт мекенжайына ұқсамайды','This doesn’t look like a website address'],
+  /* инструменты: пароль */
+  pwH:['🔑 Надёжность пароля','🔑 Құпиясөз беріктігі','🔑 Password strength'],
+  pwD:['Пароль проверяется только в этом браузере и никуда не отправляется.','Құпиясөз тек осы браузерде тексеріледі және ешқайда жіберілмейді.','The password is checked only in this browser and is never sent anywhere.'],
+  pwPh:['Введите пароль','Құпиясөзді енгізіңіз','Enter a password'],pwShow:['Показать пароль','Құпиясөзді көрсету','Show password'],
+  pwHint:['Хороший пароль: от 12 символов, буквы разного регистра, цифры и символы, без имён, дат и слов из словаря. Для каждого сайта — свой.','Жақсы құпиясөз: 12 таңбадан бастап, әртүрлі регистрдегі әріптер, сандар мен таңбалар, есімдерсіз, күндерсіз және сөздік сөздерінсіз. Әр сайтқа — өзінікі.','A good password: 12+ characters, mixed-case letters, digits and symbols, no names, dates or dictionary words. A different one for every site.'],
+  pwGen:['⚡ Сгенерировать надёжный','⚡ Берік құпиясөз жасау','⚡ Generate a strong one'],
+  pwLv:[['Очень слабый','Слабый','Средний','Надёжный','Очень надёжный'],['Өте әлсіз','Әлсіз','Орташа','Берік','Өте берік'],['Very weak','Weak','Fair','Strong','Very strong']],
+  pwTime:['Подбор на мощном компьютере: {t}','Қуатты компьютерде таңдау: {t}','Cracking on a powerful computer: {t}'],
+  pwShort:['Короче 12 символов','12 таңбадан қысқа','Shorter than 12 characters'],pwDigits:['Только цифры — подбираются мгновенно','Тек сандар — бірден табылады','Digits only — cracked instantly'],
+  pwCommon:['Популярный пароль или слово — есть в словарях мошенников','Танымал құпиясөз немесе сөз — алаяқтар сөздіктерінде бар','A popular password or word — it’s in attackers’ dictionaries'],
+  pwSeq:['Последовательность (1234, qwerty, abcd)','Тізбек (1234, qwerty, abcd)','A sequence (1234, qwerty, abcd)'],pwRep:['Повторяющиеся символы','Қайталанатын таңбалар','Repeated characters'],
+  pwYear:['Похоже на год или дату','Жылға немесе күнге ұқсайды','Looks like a year or date'],pwPattern:['Шаблон «слово + цифры» (Aidana1995) — его перебирают первым','«Сөз + сандар» үлгісі (Aidana1995) — оны бірінші болып іріктейді','A “word + digits” pattern (Aidana1995) — attackers try it first'],pwMix:['Добавьте заглавные буквы, цифры и символы','Бас әріптер, сандар мен таңбалар қосыңыз','Add capital letters, digits and symbols'],
+  pwGood:['Хороший пароль. Не используйте его на других сайтах и храните в менеджере паролей','Жақсы құпиясөз. Оны басқа сайттарда пайдаланбаңыз және құпиясөз менеджерінде сақтаңыз','A good password. Don’t reuse it on other sites and keep it in a password manager'],
+  pwNew:['Новый пароль (скопирован):','Жаңа құпиясөз (көшірілді):','New password (copied):'],
+  tu:[['мгновенно','{n} сек','{n} мин','{n} ч','{n} дн','{n} лет','больше миллиона лет'],['бірден','{n} сек','{n} мин','{n} сағ','{n} күн','{n} жыл','миллион жылдан көп'],['instantly','{n} s','{n} min','{n} h','{n} days','{n} years','over a million years']],
+  /* тренажёр */
+  trH:['Тренажёр кибербезопасности','Киберқауіпсіздік жаттықтырғышы','Cyber-safety trainer'],
+  trD:['QuasarAI собирает случайные ситуации: фишинг, фейковые сайты, социальная инженерия, вредоносные файлы. Ответ проверяется сразу, с разбором ошибок.','QuasarAI кездейсоқ жағдайлар құрастырады: фишинг, жалған сайттар, әлеуметтік инженерия, зиянды файлдар. Жауап бірден тексеріліп, қателер талданады.','QuasarAI builds random situations: phishing, fake sites, social engineering, malicious files. Answers are checked instantly, with a breakdown of mistakes.'],
+  trStart:['Начать тренировку','Жаттығуды бастау','Start training'],trIntro:['Каждый раз новые ситуации · ответ с разбором','Әр жолы жаңа жағдайлар · талдауы бар жауап','New situations every time · answers explained'],
+  trCount:['Вопросов:','Сұрақтар:','Questions:'],trBest:['Лучший результат: {r}','Үздік нәтиже: {r}','Best score: {r}'],
+  share:['Поделиться результатом','Нәтижемен бөлісу','Share the result'],shareT:['Я прошёл тренажёр CheckLink: {r}. Проверьте себя — умеете ли вы распознать мошенников:','Мен CheckLink жаттықтырғышынан өттім: {r}. Өзіңізді тексеріңіз — алаяқтарды тани аласыз ба:','I took the CheckLink trainer: {r}. Test yourself — can you spot scammers?'],
+  qOf:['Вопрос {i} из {n}','{n} сұрақтың {i}-сі','Question {i} of {n}'],next:['Далее','Келесі','Next'],finish:['Результат','Нәтиже','See result'],
+  right:['Верно!','Дұрыс!','Correct!'],wrong:['Не совсем.','Дұрыс емес.','Not quite.'],
+  resT:['Ваш результат','Сіздің нәтижеңіз','Your result'],
+  res3:['Отлично! Мошенникам будет сложно вас обмануть.','Керемет! Алаяқтарға сізді алдау қиын болады.','Excellent! Scammers will have a hard time fooling you.'],
+  res2:['Хорошо, но есть что подтянуть — посмотрите разбор ошибок.','Жақсы, бірақ жақсартатын жер бар — қателер талдауын қараңыз.','Good, but there’s room to improve — see the breakdown below.'],
+  res1:['Стоит повторить основы: разбор ниже и база знаний помогут.','Негіздерді қайталаған жөн: төмендегі талдау мен білім базасы көмектеседі.','Worth revisiting the basics: the breakdown and knowledge base will help.'],
+  mistakes:['Разбор ошибок','Қателер талдауы','Mistakes explained'],yourAns:['Ваш ответ','Сіздің жауабыңыз','Your answer'],rightAns:['Правильно','Дұрысы','Correct answer'],
+  again:['Новая тренировка','Жаңа жаттығу','New training'],noMist:['Ошибок нет — так держать!','Қате жоқ — осылай жалғастырыңыз!','No mistakes — keep it up!'],
+  /* база знаний */
+  kbH:['База знаний','Білім базасы','Knowledge base'],kbD:['Как работают схемы обмана и что делать — коротко и понятно.','Алаяқтық схемалары қалай жұмыс істейді және не істеу керек — қысқа әрі түсінікті.','How scams work and what to do — short and clear.'],
+  all:['Все','Барлығы','All'],signs:['Признаки','Белгілері','Warning signs'],steps:['Что делать','Не істеу керек','What to do'],
+  kbNone:['Ничего не найдено. Попробуйте другое слово или спросите QuasarAI.','Ештеңе табылмады. Басқа сөзді байқап көріңіз немесе QuasarAI-дан сұраңыз.','Nothing found. Try another word or ask QuasarAI.'],
+  tipsH:['Полезные советы','Пайдалы кеңестер','Useful tips'],moreTips:['Другие советы','Басқа кеңестер','More tips'],
+  /* QuasarAI */
+  askH:['Спросите QuasarAI','QuasarAI-дан сұраңыз','Ask QuasarAI'],
+  askD:['Помощник CheckLink: вставьте подозрительное сообщение или задайте вопрос. Без регистрации и платных сервисов.','CheckLink көмекшісі: күдікті хабарламаны қойыңыз немесе сұрақ қойыңыз. Тіркелусіз және ақылы қызметтерсіз.','The CheckLink assistant: paste a suspicious message or ask a question. No sign-up, no paid services.'],
+  askHi:['Здравствуйте! Я QuasarAI. Вставьте подозрительное сообщение или ссылку — оценю риск. Или спросите, например: «Что такое безопасный счёт?»','Сәлеметсіз бе! Мен QuasarAI. Күдікті хабарламаны немесе сілтемені қойыңыз — тәуекелді бағалаймын. Немесе сұраңыз, мысалы: «Қауіпсіз шот деген не?»','Hello! I’m QuasarAI. Paste a suspicious message or link and I’ll rate the risk. Or ask, for example: “What is a safe account?”'],
+  askPh:['Вопрос или текст сообщения…','Сұрақ немесе хабарлама мәтіні…','A question or message text…'],
+  aEx:[['Что такое безопасный счёт?','Как отличить поддельный сайт?','Меня обманули, что делать?'],['Қауіпсіз шот деген не?','Жалған сайтты қалай ажыратамын?','Алданып қалдым, не істеймін?'],['What is a safe account?','How do I spot a fake website?','I’ve been scammed, what now?']],
+  eCloud:['QuasarAI · облачный ИИ','QuasarAI · бұлттық ЖИ','QuasarAI · cloud AI'],eLocal:['QuasarAI · в браузере','QuasarAI · браузерде','QuasarAI · in your browser'],
+  /* если обманули */
+  hpH:['🆘 Если вас обманули','🆘 Егер сізді алдаса','🆘 If you’ve been scammed'],
+  hpD:['Действуйте сразу: от первых минут зависит, удастся ли остановить списание. Звоните только по официальным номерам — с обратной стороны карты или из приложения банка.','Бірден әрекет етіңіз: ақшаның есептен шығуын тоқтату алғашқы минуттарға байланысты. Тек ресми нөмірлерге — картаның артындағы немесе банк қолданбасындағы нөмірге қоңырау шалыңыз.','Act right away: the first minutes decide whether the payment can be stopped. Call only official numbers — from the back of your card or in the bank’s app.'],
+  hpSit:['Что случилось?','Не болды?','What happened?'],
+  hpCall:['Полиция — 102, единый номер экстренных служб — 112','Полиция — 102, төтенше қызметтердің бірыңғай нөмірі — 112','Police — 102, emergency services — 112'],
+  hpCallD:['Банк — только по номеру с обратной стороны карты или в официальном приложении. Не перезванивайте на номера из сообщений.','Банк — тек картаның артындағы нөмір немесе ресми қолданба арқылы. Хабарламадағы нөмірлерге қайта қоңырау шалмаңыз.','Your bank — only via the number on the back of the card or the official app. Never call back numbers from messages.'],
+  hpCallB:['Позвонить 102','102-ге қоңырау','Call 102'],
+  foot1:['защита от мошенников и киберугроз','алаяқтар мен киберқауіптерден қорғау','protection from scams and cyber threats'],
+  foot2:['Результаты — вероятностная оценка по известным признакам мошенничества, а не гарантия. Сомневаетесь — позвоните в банк по номеру на карте или в полицию (102).','Нәтижелер — алаяқтықтың белгілі белгілері бойынша ықтималдық бағасы, кепілдік емес. Күмәндансаңыз — картадағы нөмір бойынша банкке немесе полицияға (102) хабарласыңыз.','Results are a probabilistic estimate based on known fraud signs, not a guarantee. In doubt? Call your bank using the number on your card, or the police (102).'],
+  foot3:['Конфиденциальность: ссылки, сообщения, файлы и пароли проверяются в вашем браузере и никуда не отправляются. Вопросы QuasarAI могут обрабатываться на сервере CheckLink — личные данные из них удаляются.','Құпиялылық: сілтемелер, хабарламалар, файлдар мен құпиясөздер браузеріңізде тексеріліп, ешқайда жіберілмейді. QuasarAI сұрақтары CheckLink серверінде өңделуі мүмкін — жеке деректер олардан алынып тасталады.','Privacy: links, messages, files and passwords are checked in your browser and never sent anywhere. QuasarAI questions may be processed on the CheckLink server — personal data is removed from them.'],
+  theme:['Тема: светлая / тёмная / как в системе','Тақырып: ашық / күңгірт / жүйедегідей','Theme: light / dark / system'],
+  sz:[['Б','КБ','МБ'],['Б','КБ','МБ'],['B','KB','MB']]
+};
+/* «Если вас обманули»: 4 шага и ситуации [иконка, заголовок, текст|шаги] на трёх языках */
+const SOS=[
+  ['📵',['Прервите контакт','Байланысты үзіңіз','Cut off contact'],['Положите трубку и не отвечайте на сообщения. Ничего не подтверждайте, не устанавливайте и не диктуйте коды.','Тұтқаны қойып, хабарламаларға жауап бермеңіз. Ештеңені растамаңыз, орнатпаңыз және кодтарды айтпаңыз.','Hang up and stop replying. Don’t confirm, install or read out any codes.']],
+  ['🏦',['Позвоните в банк','Банкке қоңырау шалыңыз','Call your bank'],['По номеру на карте или в официальном приложении: заблокируйте карту и сообщите о мошеннических операциях.','Картадағы нөмір немесе ресми қолданба арқылы: картаны бұғаттап, алаяқтық операциялар туралы хабарлаңыз.','Via the number on your card or the official app: block the card and report the fraudulent transactions.']],
+  ['🔐',['Смените пароли','Құпиясөздерді ауыстырыңыз','Change passwords'],['Банк, почта, eGov, мессенджеры. Включите двухэтапную проверку и завершите сеансы на чужих устройствах.','Банк, пошта, eGov, мессенджерлер. Екі сатылы тексеруді қосып, бөгде құрылғылардағы сеанстарды аяқтаңыз.','Bank, email, eGov, messengers. Turn on two-step verification and end sessions on other devices.']],
+  ['👮',['Заявите в полицию','Полицияға арыз беріңіз','Report to the police'],['Позвоните 102 или придите в отделение. Сохраните переписку, номера, ссылки и чеки переводов — они нужны банку и полиции.','102-ге қоңырау шалыңыз немесе бөлімшеге барыңыз. Хат алмасуды, нөмірлерді, сілтемелерді және аударым түбіртектерін сақтаңыз — олар банк пен полицияға қажет.','Call 102 or visit a police station. Keep the chats, numbers, links and transfer receipts — the bank and police will need them.']]
+];
+const SITS=[
+  ['🔢',['Назвал код из СМС или данные карты','SMS кодын немесе карта деректерін айтып қойдым','I gave away an SMS code or card details'],[
+    ['Сразу позвоните в банк и заблокируйте карту','Бірден банкке қоңырау шалып, картаны бұғаттаңыз','Call the bank at once and block the card'],
+    ['Попросите отменить или оспорить операции','Операцияларды тоқтатуды немесе даулауды сұраңыз','Ask to cancel or dispute the transactions'],
+    ['Смените пароль и код входа в приложение банка','Банк қолданбасының құпиясөзі мен кіру кодын ауыстырыңыз','Change the password and login code of your bank app'],
+    ['Проверьте, не привязали ли к вашему банку новое устройство или номер','Банкіңізге жаңа құрылғы немесе нөмір байланыстырылмағанын тексеріңіз','Check that no new device or number was linked to your bank']]],
+  ['💸',['Перевёл деньги мошеннику','Алаяққа ақша аудардым','I sent money to a scammer'],[
+    ['Немедленно позвоните в свой банк: сообщите о мошенничестве и попросите остановить перевод','Дереу банкіңізге қоңырау шалып, алаяқтық туралы хабарлаңыз және аударымды тоқтатуды сұраңыз','Call your bank immediately: report the fraud and ask to stop the transfer'],
+    ['Подайте заявление в полицию (102) — номер заявления понадобится банку','Полицияға (102) арыз беріңіз — арыз нөмірі банкке қажет болады','File a police report (102) — the bank will need the report number'],
+    ['Сохраните чек перевода, номер получателя и переписку','Аударым түбіртегін, алушының нөмірін және хат алмасуды сақтаңыз','Keep the transfer receipt, the recipient’s number and the chat'],
+    ['Не верьте «службам возврата денег» за предоплату — это вторая волна обмана','Алдын ала төлем сұрайтын «ақшаны қайтару қызметтеріне» сенбеңіз — бұл алдаудың екінші толқыны','Don’t trust “money recovery services” asking for a fee — it’s the second wave of the scam']]],
+  ['📲',['Установил приложение по просьбе «банка»','«Банктің» өтінішімен қолданба орнаттым','I installed an app a “bank” asked for'],[
+    ['Включите режим полёта, чтобы отключить приложению интернет','Қолданбаның интернетін өшіру үшін ұшақ режимін қосыңыз','Turn on airplane mode to cut the app off from the internet'],
+    ['Удалите приложение. Не удаляется — уберите его из «Специальных возможностей» и «Администраторов устройства»','Қолданбаны жойыңыз. Жойылмаса — оны «Арнайы мүмкіндіктер» мен «Құрылғы әкімшілерінен» алып тастаңыз','Uninstall the app. If you can’t, remove it from “Accessibility” and “Device admin apps” first'],
+    ['С другого телефона позвоните в банк и заблокируйте карты','Басқа телефоннан банкке қоңырау шалып, карталарды бұғаттаңыз','From another phone, call the bank and block your cards'],
+    ['Смените пароли с чистого устройства; при сомнениях — сброс телефона к заводским настройкам','Құпиясөздерді таза құрылғыдан ауыстырыңыз; күмән болса — телефонды зауыттық баптауларға қайтарыңыз','Change passwords from a clean device; if in doubt, factory-reset the phone']]],
+  ['💬',['Взломали WhatsApp или Telegram','WhatsApp немесе Telegram бұзылды','My WhatsApp or Telegram was hacked'],[
+    ['WhatsApp: войдите заново по своему номеру и включите двухшаговую проверку','WhatsApp: өз нөміріңізбен қайта кіріп, екі қадамды тексеруді қосыңыз','WhatsApp: sign in again with your number and turn on two-step verification'],
+    ['Telegram: «Настройки» → «Устройства» — завершите чужие сеансы, задайте облачный пароль','Telegram: «Баптаулар» → «Құрылғылар» — бөгде сеанстарды аяқтап, бұлттық құпиясөз қойыңыз','Telegram: “Settings” → “Devices” — end unknown sessions and set a cloud password'],
+    ['Предупредите родных и друзей: от вашего имени могут просить деньги','Туыстар мен достарыңызды ескертіңіз: сіздің атыңыздан ақша сұрауы мүмкін','Warn family and friends: someone may ask for money in your name'],
+    ['Никому не пересылайте коды из СМС — даже «друзьям»','SMS кодтарын ешкімге жібермеңіз — тіпті «достарға» да','Never forward SMS codes to anyone — not even “friends”']]],
+  ['🪪',['Передал код eGov или подписал что-то ЭЦП','eGov кодын бердім немесе ЭЦҚ-мен бірдеңеге қол қойдым','I gave away an eGov code or signed something with my e-signature'],[
+    ['Смените пароль eGov и проверьте последние действия в личном кабинете','eGov құпиясөзін ауыстырып, жеке кабинеттегі соңғы әрекеттерді тексеріңіз','Change your eGov password and review recent activity in your account'],
+    ['Отзовите ЭЦП и выпустите новую','ЭЦҚ-ны кері қайтарып, жаңасын шығарыңыз','Revoke your e-signature and issue a new one'],
+    ['Проверьте кредитную историю: не оформили ли на вас кредит','Несие тарихын тексеріңіз: сіздің атыңызға несие рәсімделмеді ме','Check your credit history for loans taken out in your name'],
+    ['Если оформили кредит или перевод — сразу в банк и в полицию','Несие немесе аударым рәсімделсе — бірден банкке және полицияға','If a loan or transfer was made, go to the bank and police at once']]]
+];
+
+Object.assign(T,{
+  nSch:['Новые схемы','Жаңа схемалар','New schemes'],tCall:['📞 Звонок','📞 Қоңырау','📞 Call'],
+  callD:['Опишите, что говорил звонящий, — оценим сам разговор, а не только номер. Нажмите на подходящие фразы или напишите своими словами.','Қоңырау шалушы не айтқанын жазыңыз — нөмірді ғана емес, әңгіменің өзін бағалаймыз. Сәйкес фразаларды басыңыз немесе өз сөзіңізбен жазыңыз.','Describe what the caller said — we rate the conversation itself, not just the number. Tap matching phrases or write in your own words.'],
+  callPh:['Например: звонил «сотрудник банка», говорил о подозрительной операции и просил код из СМС','Мысалы: «банк қызметкері» қоңырау шалып, күдікті операция туралы айтып, SMS кодын сұрады','For example: a “bank employee” called about a suspicious transaction and asked for the SMS code'],
+  clear:['Очистить','Тазалау','Clear'],
+  signals:['признаков найдено','белгі табылды','warning signs found'],signals0:['Явных признаков не найдено','Айқын белгілер табылмады','No obvious warning signs'],
+  srcLocal:['🔒 Проверено в браузере — ничего не отправлялось','🔒 Браузерде тексерілді — ештеңе жіберілмеді','🔒 Checked in your browser — nothing was sent'],
+  srcCloud:['☁ Итоговая оценка — облачный ИИ CheckLink','☁ Қорытынды баға — CheckLink бұлттық ЖИ','☁ Final verdict — CheckLink cloud AI'],
+  srcServer:['Оценка сервера CheckLink','CheckLink сервері бағасы','CheckLink server verdict'],srcDevice:['Оценка в браузере','Браузердегі баға','In-browser verdict'],
+  srcCloudS:['Оценка облачного ИИ','Бұлттық ЖИ бағасы','Cloud AI verdict'],
+  hlH:['Что именно насторожило в тексте','Мәтіндегі нақты күдікті жерлер','What exactly raised concern in the text'],
+  whyLocal:['Признаки, найденные в браузере','Браузерде табылған белгілер','Signs found in your browser'],
+  cloudBtn:['Уточнить у облачного ИИ','Бұлттық ЖИ-дан нақтылау','Ask the cloud AI'],
+  cloudNote:['Нажимая, вы соглашаетесь: текст уйдёт в Google Gemini (серверы за пределами Казахстана); номера карт и телефонов, ИИН, коды и пароли из него удаляются. Облачная оценка станет итоговой.','Басу арқылы келісесіз: мәтін Google Gemini-ге (Қазақстаннан тыс серверлер) жіберіледі; одан карта және телефон нөмірлері, ЖСН, кодтар мен құпиясөздер өшіріледі. Бұлттық баға қорытынды болады.','By tapping you agree: the text goes to Google Gemini (servers outside Kazakhstan) with card and phone numbers, IIN, codes and passwords removed. The cloud verdict becomes final.'],
+  cloudOk:['Использовать облачный ИИ Google Gemini. Текст уйдёт за пределы Казахстана; номера карт и телефонов, ИИН, коды и пароли из него удаляются. Без галочки отвечает QuasarAI в браузере.','Google Gemini бұлттық ЖИ-ін қолдану. Мәтін Қазақстаннан тыс жіберіледі; одан карта және телефон нөмірлері, ЖСН, кодтар мен құпиясөздер өшіріледі. Белгісіз QuasarAI браузерде жауап береді.','Use the Google Gemini cloud AI. The text leaves Kazakhstan; card and phone numbers, IIN, codes and passwords are removed from it. Without the tick, QuasarAI answers in the browser.'],
+  cloudWait:['Облачный ИИ думает…','Бұлттық ЖИ ойлануда…','The cloud AI is thinking…'],
+  cloudNo:['Облачный ИИ сейчас недоступен — итоговой остаётся проверка в браузере','Бұлттық ЖИ қазір қолжетімсіз — қорытынды браузердегі тексеру болып қалады','The cloud AI is unavailable right now — the in-browser check stays final'],
+  askLinkQ:['Проверь, безопасна ли эта ссылка:','Бұл сілтеме қауіпсіз бе, тексер:','Check whether this link is safe:'],
+  askCallQ:['Мне позвонили. Вот что говорил звонящий:','Маған қоңырау шалды. Қоңырау шалушы мынаны айтты:','I got a call. Here is what the caller said:'],
+  scH:['Новые схемы мошенничества','Алаяқтықтың жаңа схемалары','New fraud schemes'],
+  scD:['Короткие модули по свежим схемам: найдите подвох в настоящем сценарии, выберите действие и запомните главное. Около 2 минут на модуль.','Жаңа схемалар бойынша қысқа модульдер: нақты сценарийден қулықты табыңыз, әрекетті таңдап, ең маңыздысын есте сақтаңыз. Бір модульге шамамен 2 минут.','Short modules on fresh schemes: spot the trick in a real scenario, choose what to do and remember the key points. About 2 minutes each.'],
+  scProg:['Пройдено {n} из {m}','{m} модульдің {n} өтілді','{n} of {m} completed'],scGo:['Пройти · 2 мин','Өту · 2 мин','Start · 2 min'],scDone:['Пройдено','Өтілді','Completed'],
+  scS1:['Как это выглядит','Бұл қалай көрінеді','What it looks like'],scS2:['Найдите подвох','Қулықты табыңыз','Spot the trick'],scS3:['Ваше решение','Сіздің шешіміңіз','Your decision'],scS4:['Запомните','Есте сақтаңыз','Remember'],
+  scFind:['Нажмите на подозрительные места в сообщении.','Хабарламадағы күдікті жерлерді басыңыз.','Tap the suspicious parts of the message.'],
+  scFound:['Найдено {n} из {m}','{m} ішінен {n} табылды','Found {n} of {m}'],scShow:['Показать все','Барлығын көрсету','Show all'],
+  scSigns:['Признаки этой схемы','Бұл схеманың белгілері','Signs of this scheme'],scSteps:['Что делать','Не істеу керек','What to do'],
+  scNext:['Далее','Әрі қарай','Next'],scBack:['К списку','Тізімге','Back to list'],scNextMod:['Следующий модуль','Келесі модуль','Next module'],
+  scRight:['Верно!','Дұрыс!','Correct!'],scWrong:['Не совсем. ','Толық емес. ','Not quite. '],
+  scComplete:['Модуль пройден','Модуль өтілді','Module completed'],scAll:['Все модули пройдены — вы знаете новые схемы. Поделитесь сайтом с близкими.','Барлық модуль өтілді — сіз жаңа схемаларды білесіз. Сайтты жақындарыңызбен бөлісіңіз.','All modules completed — you know the new schemes. Share the site with your family.'],
+  nmH:['Мошенничество в цифрах','Алаяқтық сандарда','Fraud in numbers'],
+  nmD:['Официальная статистика Казахстана за январь–ноябрь 2025 года: интернет-мошенничество растёт, а самые частые схемы — те, которые проверяет CheckLink.','Қазақстанның 2025 жылғы қаңтар–қарашадағы ресми статистикасы: интернет-алаяқтық өсіп келеді, ал ең жиі схемалар — CheckLink тексеретін схемалар.','Official Kazakhstan statistics for January–November 2025: internet fraud is growing, and the most common schemes are the ones CheckLink checks.'],
+  nm1:['26,3 тыс.','26,3 мың','26.3k'],nm1d:['случаев интернет-мошенничества — на 20,3% больше, чем годом ранее','интернет-алаяқтық жағдайы — бір жыл бұрынғыдан 20,3% көп','internet fraud cases — 20.3% more than a year earlier'],
+  nm2:['11,2 млрд ₸','11,2 млрд ₸','₸11.2bn'],nm2d:['ущерб от интернет-мошенничества','интернет-алаяқтықтан келген залал','losses from internet fraud'],
+  nmBarsH:['Доля самых частых схем среди всех случаев','Барлық жағдайлар ішіндегі ең жиі схемалардың үлесі','Share of the most common schemes among all cases'],
+  nmB1:['Звонки и СМС «от банка» или «полиции»','«Банктен» немесе «полициядан» қоңырау мен SMS','Calls and SMS “from the bank” or “police”'],
+  nmB2:['Несуществующие товары и услуги','Жоқ тауарлар мен қызметтер','Non-existent goods and services'],
+  nmB3:['Фишинговые ссылки и сайты','Фишинг сілтемелері мен сайттар','Phishing links and sites'],
+  nmCases:['{n} тыс. случаев','{n} мың жағдай','{n}k cases'],
+  nmSrc:['Источник: Комитет по правовой статистике Генпрокуратуры РК, январь–ноябрь 2025, по данным','Дереккөз: ҚР Бас прокуратурасының Құқықтық статистика комитеті, 2025 жылғы қаңтар–қараша, мына дерек бойынша','Source: Committee on Legal Statistics of the Prosecutor General’s Office, January–November 2025, via'],
+  glH:['Словарь: что значат эти слова','Сөздік: бұл сөздер нені білдіреді','Glossary: what these words mean'],
+  tourLink:['Как пользоваться сайтом','Сайтты қалай пайдалану керек','How to use the site'],
+  tour1:['Проверка за секунду: выберите, что проверить — ссылку, сообщение, звонок, файл или QR, — и вставьте его сюда.','Бір секундта тексеру: не тексеретініңізді таңдаңыз — сілтеме, хабарлама, қоңырау, файл немесе QR — және осында қойыңыз.','A check in a second: pick what to check — a link, message, call, file or QR — and paste it here.'],
+  tour2:['Новые схемы: пройдите короткий модуль и научитесь замечать подвох раньше, чем он сработает.','Жаңа схемалар: қысқа модульден өтіп, қулықты ол іске аспай тұрып байқауды үйреніңіз.','New schemes: take a short module and learn to spot the trick before it works.'],
+  tour3:['Сомневаетесь? Спросите QuasarAI — он объяснит простыми словами, что делать.','Күмәндісіз бе? QuasarAI-дан сұраңыз — не істеу керегін қарапайым тілмен түсіндіреді.','Not sure? Ask QuasarAI — it explains in plain words what to do.'],
+  tour4:['Если вас уже обманули — здесь срочные шаги по минутам и номера, куда звонить.','Егер сізді алдап кетсе — мұнда минуттап жедел қадамдар мен хабарласатын нөмірлер бар.','If you’ve already been scammed — urgent minute-by-minute steps and numbers to call are here.'],
+  tourNext:['Далее','Әрі қарай','Next'],tourSkip:['Пропустить','Өткізу','Skip'],tourDone:['Понятно','Түсінікті','Got it']
+});
+/* Фразы для проверки звонка: [ru, kk, en] */
+const CALLCH=[
+  ['Представился сотрудником банка','Банк қызметкері ретінде таныстырды','Said he was a bank employee'],
+  ['Звонит «из полиции», «КНБ» или «Антифрод-центра»','«Полициядан», «ҰҚК-дан» немесе «Антифрод-орталықтан» хабарласты','Called “from the police”, “KNB” or “the Antifraud Center”'],
+  ['Говорит о подозрительной операции или кредите на моё имя','Күдікті операция немесе менің атыма несие туралы айтады','Talks about a suspicious transaction or a loan in my name'],
+  ['Просит назвать код из СМС','SMS кодын айтуды сұрайды','Asks for the SMS code'],
+  ['Предлагает перевести деньги на безопасный счёт','Ақшаны қауіпсіз шотқа аударуды ұсынады','Offers to move money to a safe account'],
+  ['Просит установить приложение для удалённого доступа','Қашықтан қол жеткізу қосымшасын орнатуды сұрайды','Asks to install a remote access app'],
+  ['Торопит и просит никому не говорить','Асықтырады және ешкімге айтпауды сұрайды','Rushes me and asks me not to tell anyone']];
+/* Словарь: [термин, определение] x [ru, kk, en] */
+const GLOS=[
+  [['Фишинг','Фишинг','Phishing'],['Поддельный сайт или сообщение, чтобы выманить пароль, код или данные карты.','Құпиясөзді, кодты немесе карта деректерін алу үшін жасалған жалған сайт не хабарлама.','A fake site or message made to trick you into giving a password, code or card details.']],
+  [['Вишинг','Вишинг','Vishing'],['Обман по телефону: звонок «из банка», «полиции» или «службы безопасности».','Телефон арқылы алдау: «банктен», «полициядан» немесе «қауіпсіздік қызметінен» қоңырау.','Fraud by phone: a call “from the bank”, “police” or “security service”.']],
+  [['Квишинг','Квишинг','Quishing'],['Фишинг через QR-код: код ведёт на поддельную страницу оплаты или входа.','QR-код арқылы фишинг: код жалған төлем не кіру бетіне апарады.','Phishing via a QR code that leads to a fake payment or login page.']],
+  [['Дипфейк','Дипфейк','Deepfake'],['Голос или видео человека, подделанные с помощью ИИ.','ЖИ көмегімен жасалған адамның жалған дауысы не бейнесі.','A person’s voice or video faked with AI.']],
+  [['Домен','Домен','Domain'],['Имя сайта. Настоящий владелец — часть прямо перед зоной (.kz, .com), а не слова в начале адреса.','Сайттың аты. Нағыз иесі — аймақтың (.kz, .com) алдындағы бөлік, мекенжайдың басындағы сөздер емес.','A site’s name. The real owner is the part right before the zone (.kz, .com), not the words at the start.']],
+  [['Punycode','Punycode','Punycode'],['Запись адреса с похожими буквами других алфавитов (xn--…), чтобы подделать знакомый сайт.','Таныс сайтты қолдан жасау үшін басқа әліпбидің ұқсас әріптерімен жазылған мекенжай (xn--…).','An address written with look-alike letters from other alphabets (xn--…) to imitate a familiar site.']],
+  [['APK','APK','APK'],['Файл установки приложения для Android. Пришёл по ссылке или в мессенджере — частый способ заражения.','Android қосымшасын орнату файлы. Сілтеме не мессенджер арқылы келсе — жұқтырудың жиі тәсілі.','An Android app installer. If it arrives by link or messenger, it’s a common way to get infected.']],
+  [['Удалённый доступ','Қашықтан қол жеткізу','Remote access'],['Программа (AnyDesk, RustDesk и др.), через которую чужой человек управляет вашим телефоном.','Бөгде адам телефоныңызды басқаратын бағдарлама (AnyDesk, RustDesk т.б.).','An app (AnyDesk, RustDesk, etc.) that lets a stranger control your phone.']],
+  [['Двухфакторная защита','Екі факторлы қорғаныс','Two-factor protection'],['Второй шаг входа — код или облачный пароль. Защищает аккаунт, даже если пароль украли.','Кірудің екінші қадамы — код не бұлттық құпиясөз. Құпиясөз ұрланса да аккаунтты қорғайды.','A second login step — a code or cloud password. It protects the account even if the password is stolen.']],
+  [['«Безопасный счёт»','«Қауіпсіз шот»','“Safe account”'],['Выдумка мошенников: таких счетов не существует, деньги уходят им.','Алаяқтардың ойдан шығарғаны: мұндай шот болмайды, ақша соларға кетеді.','A scammers’ invention: such accounts don’t exist — the money goes to them.']]];
+/* Модули «Новые схемы»: kb - тема базы знаний (признаки и шаги на трёх языках), fr - подозрительные места примера,
+   o - варианты [текст, верно?] */
+const MODS=[
+  {id:'deepfake',kb:'relative',ic:'🎙️',
+   t:['Голос родственника — подделка ИИ','Туысқанның дауысы — ЖИ жасаған жалған','A relative’s voice faked by AI'],
+   from:['Голосовое сообщение · «Сын»','Дауыстық хабарлама · «Ұлым»','Voice message · “Son”'],
+   ex:['Мам, это я. Попал в аварию, телефон разбит, пишу с чужого. Срочно переведи 150 000 ₸ на эту карту, никому не говори, потом всё объясню.','Апа, бұл менмін. Апатқа түстім, телефоным сынды, басқа нөмірден жазып тұрмын. Тез арада осы картаға 150 000 ₸ аударшы, ешкімге айтпа, кейін бәрін түсіндіремін.','Mom, it’s me. I was in an accident, my phone is broken, I’m writing from someone else’s. Send 150,000 ₸ to this card right now, don’t tell anyone, I’ll explain later.'],
+   fr:[['пишу с чужого','Срочно переведи 150 000 ₸ на эту карту','никому не говори'],['басқа нөмірден жазып тұрмын','Тез арада осы картаға 150 000 ₸ аударшы','ешкімге айтпа'],['writing from someone else’s','Send 150,000 ₸ to this card right now','don’t tell anyone']],
+   q:['Голос очень похож на сына. Что сделать?','Дауыс ұлыңызға қатты ұқсайды. Не істеу керек?','The voice sounds just like your son. What do you do?'],
+   o:[[['Перевести, раз голос его','Дауысы соныкі болса, ақша аудару','Send the money — it’s his voice'],0],[['Перезвонить сыну на его обычный номер','Ұлыңызға әдеттегі нөміріне қайта қоңырау шалу','Call your son back on his usual number'],1],[['Ответить и попросить прислать фото','Жауап беріп, фото жіберуді сұрау','Reply and ask for a photo'],0]],
+   x:['ИИ подделывает голос по нескольким секундам записи из соцсетей. Проверяйте только звонком на знакомый номер и договоритесь в семье о кодовом слове.','ЖИ әлеуметтік желідегі бірнеше секундтық жазбадан дауысты жасай алады. Тек таныс нөмірге қоңырау шалып тексеріңіз және отбасыңызбен құпия сөзге келісіңіз.','AI can clone a voice from a few seconds of audio from social media. Verify only by calling a number you know, and agree on a family code word.']},
+  {id:'antifraud',kb:'safe_account',ic:'📞',
+   t:['Звонок «из Антифрод-центра» или «Нацбанка»','«Антифрод-орталықтан» немесе «Ұлттық банктен» қоңырау','A call “from the Antifraud Center” or “National Bank”'],
+   from:['Входящий звонок · «Антифрод-центр»','Кіріс қоңырау · «Антифрод-орталық»','Incoming call · “Antifraud Center”'],
+   ex:['Здравствуйте, вас беспокоит Антифрод-центр. На ваше имя пытаются оформить кредит. Чтобы сохранить деньги, переведите их на защищённый счёт — номер продиктую. Звонок конфиденциальный.','Сәлеметсіз бе, Антифрод-орталықтан хабарласып тұрмыз. Сіздің атыңызға несие ресімдеуге тырысып жатыр. Ақшаңызды сақтау үшін оны қорғалған шотқа аударыңыз — нөмірін айтамын. Қоңырау құпия.','Hello, this is the Antifraud Center. Someone is trying to take out a loan in your name. To protect your money, transfer it to a protected account — I’ll dictate the number. This call is confidential.'],
+   fr:[['вас беспокоит Антифрод-центр','переведите их на защищённый счёт','Звонок конфиденциальный'],['Антифрод-орталықтан хабарласып тұрмыз','қорғалған шотқа аударыңыз','Қоңырау құпия'],['this is the Antifraud Center','transfer it to a protected account','This call is confidential']],
+   q:['Что сделать?','Не істеу керек?','What do you do?'],
+   o:[[['Положить трубку и позвонить в банк по номеру на карте','Тұтқаны қойып, картадағы нөмір бойынша банкке хабарласу','Hang up and call your bank using the number on your card'],1],[['Перевести, раз звонит госорган','Мемлекеттік орган болса, ақша аудару','Transfer — it’s a government agency'],0],[['Назвать код, чтобы «отменить кредит»','«Несиені тоқтату» үшін кодты айту','Give the code to “cancel the loan”'],0]],
+   x:['Настоящие сотрудники банков, Нацбанка, полиции или Антифрод-центра никогда не просят перевести деньги на «защищённый» счёт — таких счетов не существует.','Банктердің, Ұлттық банктің, полицияның не Антифрод-орталықтың нағыз қызметкерлері ешқашан ақшаны «қорғалған» шотқа аударуды сұрамайды — мұндай шоттар болмайды.','Real staff of banks, the National Bank, police or the Antifraud Center never ask you to move money to a “protected” account — such accounts don’t exist.']},
+  {id:'vote',kb:'messenger',ic:'🗳️',
+   t:['«Проголосуй за меня» — угон Telegram и WhatsApp','«Маған дауыс бер» — Telegram мен WhatsApp-ты ұрлау','“Vote for me” — Telegram and WhatsApp takeover'],
+   from:['Telegram · Айгуль (знакомая)','Telegram · Айгүл (таныс)','Telegram · Aigul (a friend)'],
+   ex:['Привет! Моя племянница участвует в конкурсе, проголосуй, пожалуйста, по ссылке vote-konkurs.click 🙏 Там придёт код — пришли его мне, чтобы голос засчитали.','Сәлем! Жиенім байқауға қатысып жатыр, мына сілтеме бойынша дауыс беріп жіберші vote-konkurs.click 🙏 Код келеді — дауыс есептелуі үшін оны маған жібер.','Hi! My niece is in a contest, please vote via vote-konkurs.click 🙏 You’ll get a code — send it to me so the vote counts.'],
+   fr:[['проголосуй, пожалуйста, по ссылке','vote-konkurs.click','пришли его мне'],['дауыс беріп жіберші','vote-konkurs.click','оны маған жібер'],['please vote via','vote-konkurs.click','send it to me']],
+   q:['Пишет знакомая. Как поступить?','Таныс адам жазып тұр. Не істейсіз?','It’s from a friend. What do you do?'],
+   o:[[['Проголосовать — это же знакомая','Дауыс беру — бұл таныс адам ғой','Vote — she’s a friend'],0],[['Прислать код, он «только для голосования»','Кодты жіберу, ол «тек дауыс беру үшін»','Send the code — it’s “just for voting”'],0],[['Не открывать и не присылать код, предупредить её другим способом','Сілтемені ашпау, кодты жібермеу, оған басқа жолмен ескерту','Don’t open it or send the code; warn her another way'],1]],
+   x:['Аккаунт знакомой уже угнан. Код из СМС или Telegram — это ключ от вашего аккаунта. Включите облачный пароль (двухэтапную проверку).','Танысыңыздың аккаунты бұзылған. SMS немесе Telegram коды — сіздің аккаунтыңыздың кілті. Бұлттық құпиясөзді (екі кезеңді тексеруді) қосыңыз.','Your friend’s account is already hijacked. The SMS or Telegram code is the key to your account. Turn on two-step verification (cloud password).']},
+  {id:'quishing',kb:'qr',ic:'🅿️',
+   t:['QR-наклейка на парковке и самокате','Тұраққа және самокатқа жапсырылған QR','QR stickers on parking meters and scooters'],
+   from:['Наклейка на паркомате','Паркоматтағы жапсырма','Sticker on a parking meter'],
+   ex:['Оплата парковки по QR — быстро и без приложения! Отсканируйте код и введите данные карты: parking-pay-kz.top','QR арқылы тұраққа төлем — жылдам әрі қосымшасыз! Кодты сканерлеп, карта деректерін енгізіңіз: parking-pay-kz.top','Pay for parking by QR — fast, no app needed! Scan the code and enter your card details: parking-pay-kz.top'],
+   fr:[['без приложения','введите данные карты','parking-pay-kz.top'],['қосымшасыз','карта деректерін енгізіңіз','parking-pay-kz.top'],['no app needed','enter your card details','parking-pay-kz.top']],
+   q:['Как оплатить безопасно?','Қалай қауіпсіз төлейсіз?','How do you pay safely?'],
+   o:[[['Отсканировать — QR же на официальном паркомате','Сканерлеу — QR ресми паркоматта тұр ғой','Scan it — it’s on an official meter'],0],[['Через официальное приложение парковки или банка','Тұрақтың немесе банктің ресми қосымшасы арқылы','Through the official parking or bank app'],1],[['Ввести карту, но без CVV','Картаны CVV-сіз енгізу','Enter the card without the CVV'],0]],
+   x:['Мошенники клеят свои QR-коды поверх настоящих. Перед оплатой проверьте адрес из кода в CheckLink и платите только в официальных приложениях.','Алаяқтар өз QR-кодтарын нағыз кодтың үстіне жапсырады. Төлемес бұрын кодтағы мекенжайды CheckLink-те тексеріп, тек ресми қосымшаларда төлеңіз.','Scammers stick their own QR codes over real ones. Check the address in CheckLink before paying, and pay only in official apps.']},
+  {id:'fakeapp',kb:'malware',ic:'📲',
+   t:['«Обновите приложение банка» — поддельный APK','«Банк қосымшасын жаңартыңыз» — жалған APK','“Update your bank app” — a fake APK'],
+   from:['СМС · Bank-Support','SMS · Bank-Support','SMS · Bank-Support'],
+   ex:['Ваше приложение банка устарело и будет отключено сегодня. Установите обновление: bank-update.site/app.apk и разрешите доступ к экрану.','Банк қосымшаңыз ескірді және бүгін өшіріледі. Жаңартуды орнатыңыз: bank-update.site/app.apk және экранға қолжетімділік беріңіз.','Your bank app is outdated and will be disabled today. Install the update: bank-update.site/app.apk and allow screen access.'],
+   fr:[['будет отключено сегодня','bank-update.site/app.apk','разрешите доступ к экрану'],['бүгін өшіріледі','bank-update.site/app.apk','экранға қолжетімділік беріңіз'],['will be disabled today','bank-update.site/app.apk','allow screen access']],
+   q:['Что сделать?','Не істеу керек?','What do you do?'],
+   o:[[['Скачать файл, раз прислал банк','Банк жіберсе, файлды жүктеу','Download the file — the bank sent it'],0],[['Установить, но не давать доступ','Орнату, бірақ қолжетімділік бермеу','Install it but deny the access'],0],[['Обновлять только через Google Play или App Store','Тек Google Play немесе App Store арқылы жаңарту','Update only via Google Play or the App Store'],1]],
+   x:['Банки не присылают APK-файлы. Такой «апдейт» читает СМС и показывает мошеннику ваш экран. Если уже установили — отключите интернет и позвоните в банк.','Банктер APK файл жібермейді. Мұндай «жаңарту» SMS-ті оқып, экраныңызды алаяққа көрсетеді. Орнатып қойсаңыз — интернетті өшіріп, банкке хабарласыңыз.','Banks don’t send APK files. Such an “update” reads your SMS and shows your screen to the scammer. If you installed it, turn off the internet and call your bank.']},
+  {id:'deal',kb:'marketplace',ic:'🛋️',
+   t:['«Получите деньги по ссылке» на OLX и Kolesa','OLX пен Kolesa-да «ақшаны сілтеме арқылы алыңыз»','“Receive the money via this link” on OLX and Kolesa'],
+   from:['WhatsApp · Покупатель','WhatsApp · Сатып алушы','WhatsApp · Buyer'],
+   ex:['Здравствуйте! Беру ваш диван, уже оплатил через безопасную сделку. Чтобы получить деньги, перейдите по ссылке olx-dostavka.online и введите данные карты.','Сәлеметсіз бе! Диваныңызды аламын, қауіпсіз мәміле арқылы төлеп қойдым. Ақшаны алу үшін olx-dostavka.online сілтемесіне өтіп, карта деректерін енгізіңіз.','Hello! I’m buying your sofa and already paid via safe deal. To receive the money, open olx-dostavka.online and enter your card details.'],
+   fr:[['уже оплатил через безопасную сделку','olx-dostavka.online','введите данные карты'],['қауіпсіз мәміле арқылы төлеп қойдым','olx-dostavka.online','карта деректерін енгізіңіз'],['already paid via safe deal','olx-dostavka.online','enter your card details']],
+   q:['Вы продавец. Что делать?','Сіз сатушысыз. Не істейсіз?','You are the seller. What do you do?'],
+   o:[[['Общаться только внутри площадки и не вводить карту','Тек алаң ішінде сөйлесіп, картаны енгізбеу','Talk only inside the marketplace and never enter your card'],1],[['Ввести карту — деньги же приходят мне','Картаны енгізу — ақша маған түседі ғой','Enter the card — the money is coming to me'],0],[['Попросить скриншот оплаты','Төлем скриншотын сұрау','Ask for a payment screenshot'],0]],
+   x:['Чтобы получить перевод, хватает номера телефона или карты — CVV и коды вводить не нужно никогда. Ссылки «доставки» и «сделки» вне площадки — фишинг.','Аударым алу үшін телефон не карта нөмірі жеткілікті — CVV мен кодтарды енгізудің еш қажеті жоқ. Алаңнан тыс «жеткізу» мен «мәміле» сілтемелері — фишинг.','To receive a transfer, a phone or card number is enough — you never need to enter a CVV or codes. “Delivery” or “deal” links outside the marketplace are phishing.']},
+  {id:'aitrade',kb:'investment',ic:'📈',
+   t:['ИИ-трейдинг и видео со «знаменитостью»','ЖИ-трейдинг және «танымал адам» бейнесі','“AI trading” and a celebrity video'],
+   from:['Реклама в соцсети','Әлеуметтік желідегі жарнама','Social media ad'],
+   ex:['Известный бизнесмен рассказывает: ИИ-бот приносит 30% в месяц без риска. Вложите от 50 000 ₸ — менеджер поможет установить приложение для доступа.','Белгілі кәсіпкер айтады: ЖИ-бот тәуекелсіз айына 30% табыс әкеледі. 50 000 ₸-ден салыңыз — менеджер қолжетімділік қосымшасын орнатуға көмектеседі.','A famous businessman says an AI bot earns 30% a month with no risk. Invest from 50,000 ₸ — a manager will help you install an access app.'],
+   fr:[['30% в месяц без риска','Вложите от 50 000 ₸','установить приложение для доступа'],['тәуекелсіз айына 30%','50 000 ₸-ден салыңыз','қолжетімділік қосымшасын орнатуға'],['30% a month with no risk','Invest from 50,000 ₸','install an access app']],
+   q:['Видео выглядит настоящим. Что сделать?','Бейне шынайы көрінеді. Не істейсіз?','The video looks real. What do you do?'],
+   o:[[['Вложить немного для пробы','Сынап көру үшін аз ғана салу','Invest a little to try'],0],[['Проверить лицензию компании в реестре АРРФР и ничего не вкладывать','Компанияның лицензиясын ҚНРДА тізілімінен тексеріп, ақша салмау','Check the company’s licence in the ARDFM register and invest nothing'],1],[['Дать менеджеру установить приложение','Менеджерге қосымша орнатуға рұқсат беру','Let the manager install the app'],0]],
+   x:['Гарантированного дохода не бывает, а видео знаменитостей подделывают с помощью ИИ. Лицензию брокера проверяют на сайте Агентства по регулированию и развитию финансового рынка.','Кепілдендірілген табыс болмайды, ал танымал адамдардың бейнесін ЖИ көмегімен жасайды. Брокердің лицензиясын Қаржы нарығын реттеу және дамыту агенттігінің сайтынан тексереді.','There is no guaranteed income, and celebrity videos are faked with AI. A broker’s licence is checked on the website of the Agency for Regulation and Development of the Financial Market.']},
+  {id:'tasks',kb:'job',ic:'👍',
+   t:['«Лайки за деньги» → задания с вложением','«Лайк үшін ақша» → салыммен тапсырмалар','“Paid likes” → tasks that need a deposit'],
+   from:['Telegram · HR-менеджер','Telegram · HR-менеджер','Telegram · HR manager'],
+   ex:['Подработка: ставьте лайки и получайте 2 000 ₸ за задание. Первые выплаты уже сегодня! Для VIP-заданий нужно пополнить баланс на 20 000 ₸.','Қосымша жұмыс: лайк басып, әр тапсырма үшін 2 000 ₸ алыңыз. Алғашқы төлем бүгін-ақ! VIP-тапсырмалар үшін балансты 20 000 ₸-ге толтыру керек.','Side job: like posts and earn 2,000 ₸ per task. First payouts today! VIP tasks require topping up your balance with 20,000 ₸.'],
+   fr:[['2 000 ₸ за задание','Первые выплаты уже сегодня','пополнить баланс на 20 000 ₸'],['әр тапсырма үшін 2 000 ₸','Алғашқы төлем бүгін-ақ','балансты 20 000 ₸-ге толтыру'],['2,000 ₸ per task','First payouts today','topping up your balance with 20,000 ₸']],
+   q:['Первые 2 000 ₸ пришли. Дальше?','Алғашқы 2 000 ₸ келді. Әрі қарай?','The first 2,000 ₸ arrived. Now what?'],
+   o:[[['Пополнить, раз уже заплатили','Толтыру, өйткені олар төлеп қойды','Top up — they already paid me'],0],[['Пополнить немного, чтобы вывести бонус','Бонусты шығару үшін аздап толтыру','Top up a little to withdraw the bonus'],0],[['Остановиться: работа, где нужно платить, — обман','Тоқтау: ақша төлеуді талап ететін жұмыс — алдау','Stop: a job that asks you to pay is a scam'],1]],
+   x:['Маленькие первые выплаты — приманка. Потом просят «вложиться», и деньги не возвращаются. Настоящий работодатель не берёт деньги с работника.','Алғашқы шағын төлемдер — жем. Кейін «салым» сұрайды, ақша қайтпайды. Нағыз жұмыс беруші қызметкерден ақша алмайды.','Small first payouts are bait. Then they ask you to “invest”, and the money never comes back. A real employer never takes money from workers.']}];
+const NUM_SRC='https://finratings.kz/news/10417-kak-moshenniki-obmanuli-kazakhstantsev-na-milliardy-v-2025-godu/';
+const NUM_BARS=[['nmB1',23.5,'6,2'],['nmB2',20.3,'5,3'],['nmB3',18.5,'']];
+const L=()=>LANGS.indexOf(LANG);
+const t=k=>{const v=T[k];return v?v[L()]:k};
+const tf=(k,o)=>String(t(k)).replace(/\{(\w+)\}/g,(m,x)=>o[x]!=null?o[x]:m);
+const EXS=[['Здравствуйте, это служба безопасности Kaspi. С вашей карты пытаются списать 120 000 ₸. Назовите код из СМС, чтобы отменить операцию.','Сәлеметсіз бе, бұл Kaspi қауіпсіздік қызметі. Картаңыздан 120 000 ₸ шешуге әрекет жасалуда. Операцияны тоқтату үшін SMS кодын айтыңыз.','Hello, this is Kaspi security. Someone is trying to take 120 000 ₸ from your card. Tell us the SMS code to cancel it.'],
+  ['Мама, я попал в ДТП, срочно переведи 85 000 ₸ на эту карту, потом объясню','Апа, мен апатқа түстім, шұғыл осы картаға 85 000 ₸ аудар, кейін түсіндіремін','Mom, I had an accident, urgently send 85 000 ₸ to this card, I’ll explain later']];
+
+function toast(msg){const b=$('#toast');b.textContent=msg;b.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>b.classList.remove('on'),3800)}
+
+/* ---------------- язык и тема ---------------- */
+function applyLang(){
+  document.documentElement.lang=LANG==='kk'?'kk':LANG;
+  $$('[data-t]').forEach(el=>{const v=t(el.dataset.t);if(typeof v==='string')el.textContent=v});
+  $$('#langs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===LANG));
+  $('#askQ').placeholder=t('askPh');$('#ckSms').placeholder=t('smsPh');$('#pwIn').placeholder=t('pwPh');
+  $('#thB').title=t('theme');$('#thB').setAttribute('aria-label',t('theme'));
+  $$('.cta').forEach(b=>{b.setAttribute('aria-label',t('openApp'));b.title=t('openApp')});
+  $('#pwEye').title=t('pwShow');$('#pwEye').setAttribute('aria-label',t('pwShow'));
+  hint();apkInfo();renderSos();renderNumbers();renderGlossary();if(CK.tab==='call')renderCallCh();if(TR16.i>=0)tourShow(TR16.i);
+  if(window.QuasarCore&&QuasarCore.ready){renderKb();renderTips();renderAskEx();quizLang();renderStats();renderSchemes()}
+  if(AN.last)anRun(AN.last);
+  if($('#pwIn').value)pwRun();
+}
+$('#langs').addEventListener('click',e=>{const l=e.target.dataset&&e.target.dataset.lang;if(!l)return;LANG=l;SS('cl_site_lang',l);applyLang();if(CK.last)CK.last()});
+const THEMES=['system','light','dark'];
+function applyTheme(){
+  const m=LS('cl_site_theme','system'),dark=m==='dark'||(m==='system'&&!matchMedia('(prefers-color-scheme: light)').matches);
+  document.documentElement.dataset.theme=dark?'dark':'light';$('#thc').content=dark?'#09090b':'#f5f5f7';
+  $('#thB').textContent=m==='system'?'◐':dark?'☾':'☀';
+}
+matchMedia('(prefers-color-scheme: light)').addEventListener('change',applyTheme);
+
+/* ---------------- «Открыть приложение CheckLink» (checklink://open) ---------------- */
+const ENV=(()=>{const ua=navigator.userAgent;const ios=/iPhone|iPad|iPod/i.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);return{ios,and:!ios&&/Android/i.test(ua)}})();
+const webAppUrl=()=>{try{return new URL(PC.webAppUrl||'app/',location.href).href}catch(e){return'app/'}};
+function hint(){const h=$('#apHint');if(h)h.textContent=t(ENV.and?'hintAnd':ENV.ios?'hintIos':'hintDesk');$$('#webApp,#webApp2').forEach(a=>a.href=webAppUrl())}
+/* Страница загрузки свежего APK (/download на сервере CheckLink): ?auto=1 - загрузка начинается сама.
+   Сайт открыт с сервера CheckLink - его же /download; иначе адрес из portal-config.js */
+const dlPage=()=>{
+  if(SRV.base&&!EMB)return SRV.base+'/download';
+  try{return PC.appDownloadUrl?new URL(PC.appDownloadUrl,location.href).href:(/^https?:$/.test(location.protocol)?location.origin+'/download':'')}catch(e){return''}
+};
+const dlAuto=()=>{const d=dlPage();return d?d+(d.includes('?')?'&':'?')+'auto=1':''};
+/* Подпись кнопки «Скачать APK»: версия и размер с сервера (/api/public/app) */
+let APKJ=null;
+async function apkInfo(){
+  const a=$('#apDl');if(!a||EMB||ENV.ios)return;
+  await srvCheck();
+  const d=dlPage();if(!d)return;a.href=d;
+  try{
+    if(!APKJ){
+      const c=new AbortController(),tm=setTimeout(()=>c.abort(),12000);
+      const r=await fetch(new URL('/api/public/app',d).href,{cache:'no-store',signal:c.signal});clearTimeout(tm);
+      APKJ=r.ok?await r.json():null;
+    }
+    const j=APKJ;if(!j||!j.available)return;
+    $('#apDlV').textContent=j.version+(j.size?' · '+(j.size/1048576).toFixed(1).replace('.',LANG==='en'?'.':',')+(LANG==='en'?' MB':' МБ'):'');
+    a.hidden=false;
+  }catch(e){}
+}
+/* Chrome на Android: приложение есть - откроется оно, нет - Chrome сам перейдёт на fallback (загрузка новейшей версии) */
+const appIntent=fallback=>'intent://open#Intent;scheme='+String(PC.appScheme||'checklink')+';package='+PC.androidPackage+
+  ';S.browser_fallback_url='+encodeURIComponent(fallback)+';end';
+const chromeAnd=()=>ENV.and&&/Chrome\//.test(navigator.userAgent)&&!/SamsungBrowser|YaBrowser|OPR\/|EdgA/.test(navigator.userAgent);
+function openApp(){
+  const dl=dlAuto(),fallback=dl||webAppUrl(),sch=String(PC.appScheme||'checklink');
+  if(!ENV.and){location.href=webAppUrl();return}                     // компьютер и iPhone: приложение в браузере
+  if(chromeAnd()&&PC.androidPackage){location.href=appIntent(fallback);return}
+  let left=false;const vis=()=>{if(document.hidden)left=true};
+  document.addEventListener('visibilitychange',vis);
+  location.href=sch+'://open';
+  setTimeout(()=>{document.removeEventListener('visibilitychange',vis);if(!left){toast(t('noApp'));location.href=fallback}},1800);
+}
+/* Внутри приложения внешние ссылки открываются в системном браузере (встроенный плагин AppSettings) */
+function openExt(url){
+  const AS=capPlug('AppSettings');
+  if(EMB&&AS&&AS.openUrl){AS.openUrl({url}).catch(()=>{});return true}
+  return false;
+}
+document.addEventListener('click',e=>{
+  const a=e.target.closest&&e.target.closest('a[href^="http"]');
+  if(a&&EMB&&openExt(a.href))e.preventDefault();
+});
+
+/* ---------------- буфер обмена ---------------- */
+async function clipText(){
+  const AS=capPlug('AppSettings');
+  if(AS&&AS.readClipboard){const r=await AS.readClipboard();return String(r&&r.text||'')}
+  return await navigator.clipboard.readText();
+}
+const clipOk=()=>!!(capPlug('AppSettings')&&capPlug('AppSettings').readClipboard)||!!(navigator.clipboard&&navigator.clipboard.readText&&window.isSecureContext);
+async function pasteTo(id,run){
+  try{const v=String(await clipText()||'').trim();if(!v){toast(t('clipEmpty'));return}$(id).value=v.slice(0,4000);run(v)}
+  catch(e){toast(t('clipFail'))}
+}
+
+/* ---------------- экспресс-проверка ---------------- */
+const LVC={dangerous:'r',suspicious:'y',low:'g',unknown:''},LVCOL={dangerous:'var(--rd)',suspicious:'var(--ye)',low:'var(--gr)',unknown:'var(--bd2)'};
+const CK={tab:'link',last:null};
+function setTab(k){CK.tab=k;if(k==='call')renderCallCh();$$('[data-ck]').forEach(b=>b.setAttribute('aria-selected',b.dataset.ck===k));$$('[data-pane]').forEach(p=>p.classList.toggle('hide',p.dataset.pane!==k));$('#ckOut').innerHTML='';CK.last=null}
+$('.tabs').addEventListener('click',e=>{const k=e.target.closest('[data-ck]');if(k)setTab(k.dataset.ck)});
+function hostOf(u){try{return new URL(/^[a-z]+:\/\//i.test(u)?u:'http://'+u).hostname.toLowerCase()}catch(e){return''}}
+function isOfficial(h){const B=QuasarCore.kb.rules.brands;return Object.keys(B).some(k=>B[k].some(d=>h===d||h.endsWith('.'+d)))}
+/* Шкала риска: полукруг заполняется до оценки, цвет - по уровню */
+function gaugeHTML(score,level){
+  const s=Math.max(0,Math.min(100,Math.round(+score||0)));
+  return `<div class="gg" role="img" aria-label="${esc(t('risk'))} ${s}%"><svg viewBox="0 0 132 76" aria-hidden="true"><path class="gt" d="M12 68a54 54 0 0 1 108 0"/><path class="gv" pathLength="100" d="M12 68a54 54 0 0 1 108 0" style="stroke:${LVCOL[level]||'var(--bd2)'};stroke-dashoffset:${100-Math.max(2,s)}"/></svg><div class="ggn"><b>${s}<small>%</small></b><span>${esc(t('risk'))}</span></div></div>`;
+}
+/* Подсветка: где именно в тексте сработали правила (QuasarCore.highlight - те же правила, что и оценка) */
+function hlHTML(text){
+  let sp=[];try{sp=QuasarCore.highlight(text,LANG)}catch(e){}
+  if(!sp.length)return'';
+  let h='',p=0;const leg=new Map();
+  for(const x of sp){
+    h+=esc(text.slice(p,x.s));let cls,tip=x.text;
+    if(x.code==='link'){const lv=QuasarCore.check('link',text.slice(x.s,x.e),LANG).level;cls=lv==='dangerous'?'hr':lv==='suspicious'?'ho':'hg';tip=QuasarCore.kb.rules.levels[lv][LANG]}
+    else{cls=x.w>=40?'hr':x.w>=25?'ho':'hy';if(!leg.has(x.code))leg.set(x.code,[cls,x.text])}
+    h+=`<mark class="${cls}" title="${esc(tip)}">${esc(text.slice(x.s,x.e))}</mark>`;p=x.e;
+  }
+  h+=esc(text.slice(p));
+  return `<h3 style="margin-top:12px">${esc(t('hlH'))}</h3><div class="hl">${h}</div><div class="hll">${[...leg.values()].map(([c,x])=>`<span class="hlk ${c}">${esc(x)}</span>`).join('')}</div>`;
+}
+function resHTML(r,o={}){
+  const cl=o.cloudable&&CK.cloud?CK.cloud:null;                 // облачная оценка по согласию - итоговая
+  const lv=cl?cl.level:r.level,score=cl?cl.score:r.score,label=cl?cl.label:r.label;
+  const adv=cl&&QuasarCore.kb.rules.advice[lv]?QuasarCore.kb.rules.advice[lv][LANG]||r.advice:r.advice;
+  const reasons=r.reasons.filter(x=>x.code!=='no_signals'&&x.code!=='none'&&x.code!=='warning_text');
+  const off=(r.urls||[]).map(u=>hostOf(u.url)).filter((h,i,a)=>h&&a.indexOf(h)===i&&isOfficial(h));
+  const url=o.url&&/^https?:\/\//i.test(o.url)?o.url:'';
+  const canCloud=o.cloudable&&!cl&&SRV.cloud&&srvBase()&&!EMB;
+  return `<div class="c res ${lv}" style="margin-top:14px">
+    ${o.head||''}
+    <div class="rhd">${gaugeHTML(score,lv)}<div class="rhx"><span class="t ${LVC[lv]}">${esc(label)}</span><span class="mu" style="font-size:13.5px">${reasons.length?reasons.length+' '+esc(t('signals')):esc(t('signals0'))}</span><span class="src${cl?' cl':''}">${esc(t(cl?'srcCloud':'srcLocal'))}</span></div></div>
+    ${o.text?hlHTML(o.text):''}
+    ${cl&&cl.answer?`<div class="cai"><b>☁ QuasarAI</b>${esc(cl.answer)}</div>`:''}
+    ${off.map(h=>`<p style="margin-top:8px">✅ <b>${esc(h)}</b> — ${esc(t('official'))}</p>`).join('')}
+    ${reasons.length?`<h3 style="margin-top:10px">${esc(t(cl?'whyLocal':'why'))}</h3><ul class="li">${reasons.map(x=>`<li>${esc(x.text)}</li>`).join('')}</ul>`:(r.reasons[0]&&!cl?`<p class="mu" style="margin-top:8px">${esc(r.reasons[0].text)}</p>`:'')}
+    <h3 style="margin-top:10px">${esc(t('todo'))}</h3><ol class="st">${adv.map(a=>`<li>${esc(a)}</li>`).join('')}</ol>
+    ${canCloud?`<div class="cbx"><button class="b bs sm" data-a="cloudCk">☁ ${esc(t('cloudBtn'))}</button><span class="mu">${esc(t('cloudNote'))}</span></div>`:''}
+    ${r.disclaimer?`<p class="mu" style="font-size:12px;margin-top:10px">${esc(r.disclaimer)}</p>`:''}
+    ${url||o.anat?`<div class="row" style="margin-top:12px">${url&&r.level==='low'?`<a class="b bs sm" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(t('openLink'))}</a>`:''}${url?`<button class="b sm" data-copy="${esc(url)}">${esc(t('copy'))}</button>`:''}${o.anat?`<button class="b sm" data-anat="${esc(o.anat)}">🔎 ${esc(t('anatomy'))}</button>`:''}</div>`:''}
+  </div>`;
+}
+function need(){if(window.QuasarCore&&QuasarCore.ready)return true;$('#ckOut').innerHTML=`<p class="mu" style="margin-top:12px">${esc(t('kbFail'))}</p>`;return false}
+function checkLink(raw){
+  raw=String(raw||'').trim();if(!raw){$('#ckOut').innerHTML=`<p class="mu" style="margin-top:12px">${esc(t('empty'))}</p>`;return}
+  if(!need())return;
+  const bad=/^\s*(javascript|data|vbscript|file|intent|blob):/i.test(raw);
+  CK.type='link';CK.input=raw;CK.cloud=null;
+  CK.last=()=>{const r=QuasarCore.check('link',raw,LANG);if(bad){r.level='dangerous';r.score=100;r.label=QuasarCore.kb.rules.levels.dangerous[LANG]}$('#ckOut').innerHTML=resHTML(r,{url:bad?'':(/^https?:\/\//i.test(raw)?raw:''),anat:bad?'':raw,cloudable:!bad})};
+  CK.last();
+}
+function checkSms(txt){
+  txt=String(txt||'').trim();if(!txt){$('#ckOut').innerHTML=`<p class="mu" style="margin-top:12px">${esc(t('empty'))}</p>`;return}
+  if(!need())return;
+  CK.type='sms';CK.input=txt;CK.cloud=null;
+  CK.last=()=>{$('#ckOut').innerHTML=resHTML(QuasarCore.check('sms',txt,LANG),{text:txt,cloudable:true})};CK.last();
+}
+function checkCall(txt){
+  txt=String(txt||'').trim();if(!txt){$('#ckOut').innerHTML=`<p class="mu" style="margin-top:12px">${esc(t('empty'))}</p>`;return}
+  if(!need())return;
+  CK.type='call';CK.input=txt;CK.cloud=null;
+  CK.last=()=>{$('#ckOut').innerHTML=resHTML(QuasarCore.check('call',txt,LANG),{text:txt,cloudable:true})};CK.last();
+}
+function renderCallCh(){
+  const box=$('#callCh');if(!box)return;const v=$('#ckCall').value;
+  box.innerHTML=CALLCH.map((p,i)=>`<button type="button" data-a="callCh" data-v="${i}" aria-pressed="${v.includes(p[L()])}">${esc(p[L()])}</button>`).join('');
+  $('#ckCall').placeholder=t('callPh');
+}
+function callToggle(i){
+  const ta=$('#ckCall'),p=CALLCH[i][L()];let v=ta.value;
+  if(v.includes(p))v=v.replace(p+'. ','').replace(p+'.','').replace(p,'');else v=(v.trim()?v.trim().replace(/[.]?$/,'. '):'')+p+'.';
+  ta.value=v.trim();renderCallCh();
+}
+/* Облачная оценка - только по нажатию: сайт обещает, что без спроса тексты не уходят. После ответа она итоговая */
+async function cloudCheck(){
+  const inp=CK.input;if(!inp)return;
+  const q=CK.type==='link'||CK.type==='qr'?t('askLinkQ')+' '+inp:CK.type==='call'?t('askCallQ')+' '+inp:inp;
+  const b=$('[data-a="cloudCk"]');if(b){b.disabled=true;b.innerHTML='<span class="spn" aria-hidden="true"></span> '+esc(t('cloudWait'))}
+  let j=null;const c=new AbortController(),tm=setTimeout(()=>c.abort(),25000);
+  try{const r=await fetch(srvBase()+'/api/public/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,lang:LANG,cloud:true}),signal:c.signal});if(r.ok)j=await r.json()}catch(e){}
+  finally{clearTimeout(tm)}
+  if(inp!==CK.input)return;                                   // пока ждали, проверили другое
+  if(!j||j.engine!=='cloud'||!j.risk||!LVC[j.risk.level]){toast(t('cloudNo'));if(b){b.disabled=false;b.textContent='☁ '+t('cloudBtn')}return}
+  CK.cloud={score:+j.risk.score||0,level:j.risk.level,label:String(j.risk.label||QuasarCore.kb.rules.levels[j.risk.level][LANG]),answer:String(j.answer||'').slice(0,2000)};
+  if(CK.last)CK.last();
+}
+async function checkFile(f){
+  if(!f||!need())return;
+  CK.type='file';CK.input='';CK.cloud=null;
+  const r=await QuasarCore.checkFile(f,LANG);
+  CK.last=async()=>{const x=await QuasarCore.checkFile(f,LANG);$('#ckOut').innerHTML=resHTML(x,{head:`<p style="word-break:break-all;margin-bottom:6px"><b>${esc(x.name)}</b> <span class="mu">· ${esc(x.typeName)} · ${esc(x.sizeText)}</span></p>`})};
+  $('#ckOut').innerHTML=resHTML(r,{head:`<p style="word-break:break-all;margin-bottom:6px"><b>${esc(r.name)}</b> <span class="mu">· ${esc(r.typeName)} · ${esc(r.sizeText)}</span></p>`});
+}
+/* QR с изображения: BarcodeDetector браузера, иначе jsQR (локальная копия vendor/jsQR.js, затем CDN) */
+const JSQR_URL='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
+function loadScript(src,cdn){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.async=true;if(cdn){s.crossOrigin='anonymous';s.referrerPolicy='no-referrer'}s.onload=()=>window.jsQR?ok(window.jsQR):no(new Error('jsqr'));s.onerror=()=>{s.remove();no(new Error('jsqr'))};document.head.append(s)})}
+let jsqrP=null;const jsqr=()=>window.jsQR?Promise.resolve(window.jsQR):(jsqrP=jsqrP||loadScript('vendor/jsQR.js').catch(()=>loadScript(JSQR_URL,true)).catch(e=>{jsqrP=null;throw e}));
+async function decodeQr(file){
+  const bmp=await createImageBitmap(file).catch(()=>null);if(!bmp)return'';
+  if('BarcodeDetector' in window){try{const d=new BarcodeDetector({formats:['qr_code']});const c=await d.detect(bmp);if(c.length)return String(c[0].rawValue||'')}catch(e){}}
+  const lib=await jsqr();
+  const k=Math.min(1,1400/Math.max(bmp.width,bmp.height)),w=Math.max(1,Math.round(bmp.width*k)),h=Math.max(1,Math.round(bmp.height*k));
+  const cv=document.createElement('canvas');cv.width=w;cv.height=h;const x=cv.getContext('2d',{willReadFrequently:true});x.drawImage(bmp,0,0,w,h);
+  const r=lib(x.getImageData(0,0,w,h).data,w,h,{inversionAttempts:'attemptBoth'});return r?String(r.data||''):'';
+}
+async function checkQr(f){
+  if(!f||!need())return;
+  let txt='';
+  try{txt=await decodeQr(f)}catch(e){$('#ckOut').innerHTML=`<p class="mu" style="margin-top:12px">${esc(t('qrLib'))}</p>`;return}
+  if(!txt){$('#ckOut').innerHTML=`<p class="mu" style="margin-top:12px">${esc(t('qrNone'))}</p>`;return}
+  CK.type='qr';CK.input=txt;CK.cloud=null;
+  CK.last=()=>{const r=QuasarCore.check('qr',txt,LANG);$('#ckOut').innerHTML=resHTML(r,{cloudable:true,url:/^https?:\/\//i.test(txt)?txt:'',anat:/^https?:\/\//i.test(txt)?txt:'',head:`<p class="mu" style="font-size:12px">${esc(t('qrGot'))}</p><p style="word-break:break-all;font-family:ui-monospace,Menlo,monospace;margin-bottom:6px">${esc(txt.slice(0,500))}</p>`})};
+  CK.last();
+}
+function dropZone(id,input,fn){
+  const z=$(id),i=$(input);
+  z.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();i.click()}});
+  i.addEventListener('change',()=>{const f=i.files[0];i.value='';fn(f)});
+  ['dragenter','dragover'].forEach(ev=>z.addEventListener(ev,e=>{e.preventDefault();z.classList.add('on')}));
+  ['dragleave','drop'].forEach(ev=>z.addEventListener(ev,e=>{e.preventDefault();z.classList.remove('on')}));
+  z.addEventListener('drop',e=>{const f=e.dataTransfer&&e.dataTransfer.files[0];if(f)fn(f)});
+}
+dropZone('#drop','#ckFile',checkFile);dropZone('#dropQr','#ckQr',checkQr);
+$('#ckLink').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();checkLink(e.target.value)}});
+
+/* ---------------- инструмент: разбор адреса ----------------
+   Показывает, из чего состоит ссылка, и где настоящий владелец: зарегистрированный домен (часть перед зоной;
+   для .com.kz, .gov.kz и т.п. - на одну часть дальше). Признаки риска - те же, что у проверки QuasarCore. */
+const AN={last:''};
+const skel=s=>s.toLowerCase().split('rn').join('m').split('vv').join('w').replace(/[0135l$]/g,c=>({'0':'o','1':'i','3':'e','5':'s','l':'i','$':'s'}[c]));
+function anParse(raw){
+  const s=String(raw||'').trim().replace(/[.,;:!?)»"']+$/,'');
+  if(!s)return null;
+  if(/^\s*(javascript|data|vbscript|file|intent|blob|content):/i.test(s))return{bad:true};
+  let u;try{u=new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(s)?s:'http://'+s)}catch(e){return{err:true}}
+  if(!/^https?:$/.test(u.protocol)||!u.hostname)return{err:true};
+  const R=QuasarCore.kb.rules,host=u.hostname.toLowerCase().replace(/\.$/,'');
+  const ip=/^\d{1,3}(\.\d{1,3}){3}$/.test(host)||host.startsWith('[');
+  const lab=host.split('.');
+  let n=1;if(!ip&&lab.length>=3&&R.second_level.includes(lab[lab.length-2]))n=2;
+  const zone=ip?'':lab.slice(-n).join('.'),reg=ip?host:lab.slice(-(n+1)).join('.'),subs=ip?[]:lab.slice(0,-(n+1));
+  let official='',fake='',fakeDom='';
+  for(const b of Object.keys(R.brands)){
+    const doms=R.brands[b];
+    if(doms.some(d=>host===d||host.endsWith('.'+d))){official=b;break}
+    if(!fake&&(skel(host).includes(skel(b))||u.username.toLowerCase().includes(b))){fake=b;fakeDom=doms[0]}
+  }
+  return{u,host,ip,zone,reg,subs,official,fake,fakeDom,res:QuasarCore.check('link',s,LANG),raw:s};
+}
+const dec=(f,x)=>{try{return f(x)}catch(e){return x}};
+const BN={kaspi:'Kaspi',halyk:'Halyk Bank',homebank:'Homebank',egov:'eGov',jusan:'Jusan',kazpost:'Казпочта'};
+function anRun(raw){
+  AN.last=raw;
+  const out=$('#anOut');if(!out)return;
+  if(!(window.QuasarCore&&QuasarCore.ready)){out.innerHTML=`<p class="mu" style="margin-top:10px">${esc(t('kbFail'))}</p>`;return}
+  const a=anParse(raw);
+  if(!a){out.innerHTML='';return}
+  if(a.bad||a.err){out.innerHTML=`<p style="margin-top:10px">${a.bad?'⛔':'❔'} ${esc(t(a.bad?'fBad':'fErr'))}</p>`;return}
+  const u=a.u,R=QuasarCore.kb.rules,codes=a.res.reasons.map(x=>x.code);
+  const seg=(txt,lbl,cls)=>`<span class="${cls||''}">${esc(txt)}<small>${esc(lbl)}</small></span>`;
+  let parts=seg(u.protocol.replace(':','')+'://',t('aProto'),u.protocol==='http:'?'bad':'');
+  if(u.username)parts+=seg(dec(decodeURIComponent,u.username)+'@',t('aUser'),'bad');
+  if(a.subs.length)parts+=seg(a.subs.join('.')+'.',t('aSub'),a.subs.length>=3?'bad':'');
+  parts+=seg(a.ip?a.host:a.reg.slice(0,a.reg.length-a.zone.length-1),t('aOwn'),'own'+(a.fake||a.ip?' bad':''));
+  if(a.zone)parts+=seg('.'+a.zone,t('aZone'),R.bad_tlds.includes(a.zone.split('.').pop())?'bad':'');
+  if(u.port)parts+=seg(':'+u.port,t('aPort'));
+  if(u.pathname&&u.pathname!=='/')parts+=seg(dec(decodeURI,u.pathname).slice(0,80),t('aPath'));
+  if(u.search)parts+=seg(u.search.slice(0,60)+(u.search.length>60?'…':''),t('aQuery'));
+  const F=[];
+  F.push(['🏠',tf('fOwner',{d:a.reg})]);
+  if(a.official)F.push(['✅',tf('fOfficial',{b:BN[a.official]||a.official})]);
+  if(a.fake)F.push(['⛔',tf('fFake',{b:BN[a.fake]||a.fake,d:a.fakeDom})]);
+  if(u.username)F.push(['⚠️',tf('fAt',{d:a.reg})]);
+  F.push(u.protocol==='https:'?['🔒',t('fHttps')]:['⚠️',t('fHttp')]);
+  if(a.ip)F.push(['⚠️',t('fIp')]);
+  if(codes.includes('bad_tld'))F.push(['⚠️',tf('fZone',{z:a.zone.split('.').pop()})]);
+  if(codes.includes('shortener'))F.push(['⚠️',t('fShort')]);
+  if(codes.includes('punycode'))F.push(['⚠️',t('fPuny')]);
+  if(codes.includes('many_sub'))F.push(['⚠️',t('fSubs')]);
+  if(codes.includes('apk'))F.push(['⛔',t('fApk')]);
+  const r=a.res;
+  out.innerHTML=`<div class="anat" aria-label="${esc(a.raw)}">${parts}</div>
+    <ul class="fnd">${F.map(([i,x])=>`<li><b aria-hidden="true">${i}</b><span>${esc(x)}</span></li>`).join('')}</ul>
+    <div class="row" style="margin-top:6px"><span class="t ${LVC[r.level]}">${esc(r.label)}</span><span class="mu">${esc(t('risk'))} ${r.score}%</span></div>`;
+}
+$('#anIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();anRun(e.target.value)}});
+
+/* ---------------- инструмент: надёжность пароля (только в браузере) ---------------- */
+const pwEval=p=>QuasarCore.password(p);   // одна оценка с приложением (quasar-core.js)
+function pwTime(bits){
+  const s=Math.pow(2,bits)/1e10/2,U=T.tu[L()];   // 10 млрд попыток в секунду, в среднем половина перебора
+  const f=(i,n)=>U[i].replace('{n}',n.toLocaleString(LANG==='en'?'en':'ru',{maximumFractionDigits:0}));
+  if(s<1)return U[0];if(s<60)return f(1,Math.round(s));if(s<3600)return f(2,Math.round(s/60));if(s<86400)return f(3,Math.round(s/3600));
+  if(s<31557600)return f(4,Math.round(s/86400));const y=s/31557600;return y>1e6?U[6]:f(5,Math.round(y));
+}
+function pwRun(){
+  const p=$('#pwIn').value,out=$('#pwOut');
+  if(!p){out.innerHTML=`<p class="mu" style="margin-top:10px;font-size:13px">${esc(t('pwHint'))}</p>`;return}
+  const r=pwEval(p),col=['var(--rd)','var(--rd)','var(--ye)','var(--gr)','var(--gr)'][r.lv];
+  out.innerHTML=`<div class="pwm" aria-hidden="true">${[0,1,2,3,4].map(i=>`<i style="${i<=r.lv?'background:'+col:''}"></i>`).join('')}</div>
+    <div class="row" style="justify-content:space-between"><b style="color:${col}">${esc(T.pwLv[L()][r.lv])}</b><span class="mu" style="font-size:13px">${esc(tf('pwTime',{t:pwTime(r.bits)}))}</span></div>
+    <ul class="fnd">${r.is.length?r.is.map(k=>`<li><b aria-hidden="true">⚠️</b><span>${esc(t(k))}</span></li>`).join(''):''}${r.lv>=3&&!r.is.includes('pwCommon')?`<li><b aria-hidden="true">✅</b><span>${esc(t('pwGood'))}</span></li>`:''}</ul>`;
+}
+$('#pwIn').addEventListener('input',pwRun);
+function pwGenerate(){
+  const sets=['ABCDEFGHJKLMNPQRSTUVWXYZ','abcdefghijkmnopqrstuvwxyz','23456789','!@#$%&*?-_+='],all=sets.join('');
+  const rnd=n=>{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n};
+  const ch=sets.map(s=>s[rnd(s.length)]);while(ch.length<16)ch.push(all[rnd(all.length)]);
+  for(let i=ch.length-1;i>0;i--){const j=rnd(i+1);[ch[i],ch[j]]=[ch[j],ch[i]]}
+  return ch.join('');
+}
+
+/* ---------------- тренажёр ---------------- */
+const QZ={list:[],i:0,ans:[],seed:0,state:'intro',n:+LS('cl_quiz_n','10')||10};
+if(![5,10,20].includes(QZ.n))QZ.n=10;
+const qBest=()=>{try{return JSON.parse(LS('cl_quiz_best','{}'))||{}}catch(e){return{}}};
+function quizIntro(){
+  QZ.state='intro';
+  const b=qBest()[QZ.n];
+  $('#quiz').innerHTML=`<div class="score"><svg class="ring" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" fill="none" stroke="var(--bd)" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="var(--vi)" stroke-width="3" stroke-dasharray="94.2" stroke-dashoffset="30" stroke-linecap="round" transform="rotate(-90 18 18)"/><text x="18" y="21.5" text-anchor="middle" font-size="9" font-weight="700" fill="var(--tx)">${QZ.n}</text></svg>
+    <div style="flex:1;min-width:220px"><h3>${esc(t('trH'))}</h3><p class="mu">${esc(t('trIntro'))}</p>
+      <div class="row" style="margin-top:10px"><span class="mu" style="font-size:13px">${esc(t('trCount'))}</span><div class="seg" role="group" aria-label="${esc(t('trCount'))}">${[5,10,20].map(n=>`<button data-qn="${n}" aria-pressed="${QZ.n===n}">${n}</button>`).join('')}</div></div>
+      ${b?`<p class="mu" style="font-size:13px;margin-top:8px">🏆 ${esc(tf('trBest',{r:b.ok+'/'+QZ.n}))}</p>`:''}
+      <button class="b bv" data-a="qStart" style="margin-top:12px">${esc(t('trStart'))}</button></div></div>`;
+}
+function qStart(){
+  QZ.seed=Math.floor(Math.random()*4294967296);QZ.list=QuasarCore.quiz(QZ.n,LANG,QZ.seed);QZ.i=0;QZ.ans=[];QZ.state='q';qRender();
+  $('#trainer').scrollIntoView({block:'start'});
+}
+function quizLang(){                                      // смена языка: те же вопросы (тот же seed) на новом языке
+  if(QZ.state==='intro'){quizIntro();return}
+  QZ.list=QuasarCore.quiz(QZ.list.length||QZ.n,LANG,QZ.seed);
+  if(QZ.state==='q')qRender();else qResult();
+}
+function qRender(){
+  const q=QZ.list[QZ.i],n=QZ.list.length,a=QZ.ans[QZ.i];
+  const opts=q.opts.map((o,j)=>{
+    let cls='';if(a!=null){if(o.ok)cls='ok';else if(j===a)cls='no'}
+    return `<button class="opt ${cls}" data-opt="${j}"${a!=null?' disabled':''}><b>${'ABCD'[j]}</b><span>${esc(o.t)}</span></button>`;
+  }).join('');
+  let fb='';
+  if(a!=null){
+    const ch=q.opts[a],ok=!!ch.ok;
+    fb=`<div class="fb ${ok?'ok':'no'}" role="status"><b>${esc(t(ok?'right':'wrong'))}</b> ${ok?'':esc(ch.why||'')}<p class="mu" style="margin-top:6px">${esc(q.explain)}</p></div>
+      <div class="row" style="margin-top:12px;justify-content:flex-end"><button class="b bv" data-a="qNext">${esc(t(QZ.i+1<n?'next':'finish'))}</button></div>`;
+  }
+  $('#quiz').innerHTML=`<div class="qtop"><span class="mu">${esc(t('qOf').replace('{i}',QZ.i+1).replace('{n}',n))}</span><span class="t v">${esc(q.catLabel)}</span></div>
+    <div class="prog"><i style="width:${(QZ.i+(a!=null?1:0))/n*100}%"></i></div>
+    <p class="qq">${esc(q.q)}</p><div class="opts" role="group">${opts}</div>${fb}`;
+  if(a!=null){const nb=$('[data-a="qNext"]');if(nb)nb.focus({preventScroll:true})}
+}
+function qResult(){
+  const first=QZ.state!=='res';QZ.state='res';
+  const n=QZ.list.length,ok=QZ.list.filter((q,i)=>q.opts[QZ.ans[i]]&&q.opts[QZ.ans[i]].ok).length,p=ok/n;
+  if(first){const B=qBest(),b=B[n];if(!b||ok>b.ok){B[n]={ok,at:Date.now()};SS('cl_quiz_best',JSON.stringify(B))}}
+  QZ.ok=ok;
+  const col=p>=.8?'var(--gr)':p>=.5?'var(--ye)':'var(--rd)';
+  const mist=QZ.list.map((q,i)=>({q,a:QZ.ans[i]})).filter(x=>!(x.q.opts[x.a]&&x.q.opts[x.a].ok));
+  const best=qBest()[n];
+  $('#quiz').innerHTML=`<div class="score"><svg class="ring" viewBox="0 0 36 36" role="img" aria-label="${ok}/${n}"><circle cx="18" cy="18" r="15" fill="none" stroke="var(--bd)" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="${col}" stroke-width="3" stroke-dasharray="94.2" stroke-dashoffset="${94.2*(1-p)}" stroke-linecap="round" transform="rotate(-90 18 18)"/><text x="18" y="21.5" text-anchor="middle" font-size="9" font-weight="700" fill="var(--tx)">${ok}/${n}</text></svg>
+    <div style="flex:1;min-width:220px"><h3>${esc(t('resT'))}</h3><p class="mu">${esc(t(p>=.8?'res3':p>=.5?'res2':'res1'))}</p>
+      ${best?`<p class="mu" style="font-size:13px;margin-top:4px">🏆 ${esc(tf('trBest',{r:best.ok+'/'+n}))}</p>`:''}
+      <div class="row" style="margin-top:12px"><button class="b bv" data-a="qStart">${esc(t('again'))}</button><button class="b sm" data-a="qShare">↗ ${esc(t('share'))}</button></div></div></div>
+    <div class="mist"><h3>${esc(t('mistakes'))}</h3>${mist.length?mist.map(x=>{const ch=x.q.opts[x.a],good=x.q.opts.find(o=>o.ok);return `<div class="c" style="margin-top:10px;padding:14px"><span class="t v">${esc(x.q.catLabel)}</span><p style="margin:8px 0;font-weight:600">${esc(x.q.q)}</p>
+      <p><span class="t r">${esc(t('yourAns'))}</span> ${esc(ch?ch.t:'—')}</p>${ch&&ch.why?`<p class="mu" style="margin:4px 0 6px">${esc(ch.why)}</p>`:''}
+      <p><span class="t g">${esc(t('rightAns'))}</span> ${esc(good?good.t:'')}</p><p class="mu" style="margin-top:6px">${esc(x.q.explain)}</p></div>`}).join(''):`<p class="mu" style="margin-top:6px">${esc(t('noMist'))}</p>`}</div>`;
+}
+async function qShare(){
+  const url=EMB?(PC.server?PC.server.replace(/\/+$/,'')+'/#trainer':''):location.origin+location.pathname+'#trainer';
+  const text=tf('shareT',{r:QZ.ok+'/'+QZ.list.length});
+  try{if(navigator.share){await navigator.share({title:'CheckLink',text,url:url||undefined});return}}catch(e){if(e&&e.name==='AbortError')return}
+  try{await navigator.clipboard.writeText(text+(url?' '+url:''));toast(t('copied'))}catch(e){}
+}
+$('#quiz').addEventListener('click',e=>{
+  const n=e.target.closest('[data-qn]');
+  if(n&&QZ.state==='intro'){QZ.n=+n.dataset.qn;SS('cl_quiz_n',String(QZ.n));quizIntro();return}
+  const o=e.target.closest('[data-opt]');if(!o||o.disabled||QZ.state!=='q')return;
+  QZ.ans[QZ.i]=+o.dataset.opt;qRender();
+});
+
+/* ---------------- база знаний и советы ---------------- */
+const KB={cat:'',q:'',open:'',tipOff:0};
+function renderKb(){
+  const tops=QuasarCore.topics(LANG),cats=[];tops.forEach(x=>{if(!cats.some(c=>c[0]===x.cat))cats.push([x.cat,x.catLabel])});
+  $('#kbCats').innerHTML=[['',t('all')]].concat(cats).map(([k,l])=>`<button data-cat="${esc(k)}" aria-pressed="${KB.cat===k}">${esc(l)}</button>`).join('');
+  const q=KB.q.trim().toLowerCase().replace(/ё/g,'е');
+  const list=tops.filter(x=>(!KB.cat||x.cat===KB.cat)&&(!q||[x.title,x.summary].concat(x.signs,x.steps).join(' ').toLowerCase().replace(/ё/g,'е').includes(q)));
+  $('#kbGrid').innerHTML=list.length?list.map(x=>`<div class="c kb" role="button" tabindex="0" data-kb="${esc(x.id)}" aria-expanded="${KB.open===x.id}">
+    <span class="ic" aria-hidden="true">${esc(x.icon)}</span><h3>${esc(x.title)}</h3><p class="mu">${esc(x.summary)}</p>
+    <div class="more">${x.signs.length?`<h3 style="margin-top:6px">${esc(t('signs'))}</h3><ul class="li">${x.signs.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>`:''}
+    ${x.steps.length?`<h3 style="margin-top:10px">${esc(t('steps'))}</h3><ol class="st">${x.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>`:''}</div></div>`).join('')
+    :`<p class="mu">${esc(t('kbNone'))}</p>`;
+}
+function renderTips(){
+  const all=QuasarCore.tips(LANG),n=6,out=[];
+  for(let i=0;i<Math.min(n,all.length);i++)out.push(all[(KB.tipOff+i)%all.length]);
+  $('#tips').innerHTML=out.map(x=>`<div class="tip">${esc(x)}</div>`).join('');
+}
+$('#kbCats').addEventListener('click',e=>{const b=e.target.closest('[data-cat]');if(!b)return;KB.cat=b.dataset.cat;renderKb()});
+$('#kbQ').addEventListener('input',e=>{KB.q=e.target.value;renderKb()});
+const kbToggle=el=>{KB.open=KB.open===el.dataset.kb?'':el.dataset.kb;renderKb();const n=$(`[data-kb="${KB.open}"]`);if(n){n.focus({preventScroll:true});n.scrollIntoView({block:'nearest'})}};
+$('#kbGrid').addEventListener('click',e=>{const c=e.target.closest('[data-kb]');if(c)kbToggle(c)});
+$('#kbGrid').addEventListener('keydown',e=>{const c=e.target.closest('[data-kb]');if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();kbToggle(c)}});
+
+/* ---------------- цифры на главной ---------------- */
+const plural=(n,f)=>{if(f.length<3)return f[0];const a=n%10,b=n%100;return f[a===1&&b!==11?0:a>=2&&a<=4&&(b<12||b>14)?1:2]};
+function renderStats(){
+  const K=QuasarCore.kb,items=[[K.topics.length,'stTop'],[K.quiz.templates.length,'stQuiz'],[3,'stLang']];
+  $('#stats').innerHTML=items.map(([n,k])=>`<div><b>${n}</b><span>${esc(plural(n,T[k][L()]))}</span></div>`).join('');
+}
+
+/* ---------------- «Если вас обманули» ---------------- */
+const SOSO={open:-1};
+function renderSos(){
+  const i=L();
+  $('#sos').innerHTML=SOS.map((x,k)=>`<div class="c"><span class="n">${k+1}</span><span class="ic" aria-hidden="true">${x[0]}</span><h3>${esc(x[1][i])}</h3><p class="mu">${esc(x[2][i])}</p></div>`).join('');
+  $('#sits').innerHTML=SITS.map((x,k)=>`<div class="c sit" role="button" tabindex="0" data-sit="${k}" aria-expanded="${SOSO.open===k}"><span style="font-size:22px" aria-hidden="true">${x[0]}</span><h3 style="margin-top:4px">${esc(x[1][i])}</h3>
+    <div class="more"><ol class="st">${x[2].map(s=>`<li>${esc(s[i])}</li>`).join('')}</ol></div></div>`).join('');
+}
+const sitToggle=el=>{SOSO.open=SOSO.open===+el.dataset.sit?-1:+el.dataset.sit;renderSos();const n=$(`[data-sit="${SOSO.open}"]`);if(n)n.focus({preventScroll:true})};
+$('#sits').addEventListener('click',e=>{const c=e.target.closest('[data-sit]');if(c)sitToggle(c)});
+$('#sits').addEventListener('keydown',e=>{const c=e.target.closest('[data-sit]');if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();sitToggle(c)}});
+
+/* ---------------- QuasarAI ----------------
+   Ответ в браузере (QuasarCore, без сети). Облачный ИИ (бесплатный Gemini) - только если посетитель поставил галочку
+   согласия (1.8.0): тогда вопрос уходит на /api/public/ask, сервер удаляет из текста личные данные. */
+const CH={hist:[]},SRV={cloud:false,ver:'',checked:false};
+const verGE=(a,b)=>{const x=String(a||'').split('.').map(n=>parseInt(n,10)||0),y=String(b).split('.').map(n=>parseInt(n,10)||0);for(let i=0;i<3;i++){if((x[i]||0)!==(y[i]||0))return(x[i]||0)>(y[i]||0)}return true};
+/* Сервер CheckLink: сайт, открытый с самого сервера, обращается к нему же; встроенный в приложение или размещённый
+   отдельно (статический хостинг) - к адресу из portal-config.js */
+const srvList=()=>[...new Set([/^https?:$/.test(location.protocol)&&!EMB&&!PC.static?location.origin:'',String(PC.server||'').replace(/\/+$/,'')].filter(Boolean))];   // static: сайт на GitHub Pages (1.8.0) - API только у сервера
+const srvBase=()=>SRV.base||srvList()[0]||'';
+function srvCheck(){if(!SRV.checked)SRV.checked=srvCheck1();return SRV.checked}   // один опрос на страницу; ждать можно сколько угодно раз
+async function srvCheck1(){
+  for(const b of srvList()){
+    const c=new AbortController(),tm=setTimeout(()=>c.abort(),6000);
+    try{const r=await fetch(b+'/api/health',{signal:c.signal,cache:'no-store'});const j=await r.json();if(j&&j.app==='quasarai'){SRV.base=b;SRV.ver=String(j.version||'');SRV.cloud=!!(j.ai&&j.ai.cloud);SRV.portal=!!(j.web&&j.web.portal);break}}catch(e){}
+    finally{clearTimeout(tm)}
+  }
+  const os=$('#openSite');if(os)os.classList.toggle('hide',!(EMB&&SRV.portal&&verGE(SRV.ver,'1.5.0')));
+}
+function addMsg(role,text){const d=document.createElement('div');d.className='m '+role;d.textContent=text;$('#log').appendChild(d);$('#log').scrollTop=1e9;return d}
+function renderAskEx(){$('#askEx').innerHTML=T.aEx[L()].map(q=>`<button class="b sm" data-q="${esc(q)}">${esc(q)}</button>`).join('');if(!CH.hist.length){$('#log').innerHTML='';addMsg('a',t('askHi'))}}
+async function ask(q){
+  q=String(q||'').trim();if(!q)return;
+  addMsg('u',q);CH.hist.push({role:'user',content:q});
+  const wait=addMsg('a','…');
+  let a='',cloud=false,risk=null;                      // одна оценка на ответ: облака, сервера или браузера
+  const ok=$('#cloudOk');
+  if(SRV.cloud&&srvBase()&&ok&&ok.checked){            // 1.8.0: облако - только с галочкой согласия
+    const c=new AbortController(),tm=setTimeout(()=>c.abort(),15000);
+    try{const r=await fetch(srvBase()+'/api/public/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,lang:LANG,history:CH.hist.slice(-8,-1),cloud:true}),signal:c.signal});
+      if(r.ok){const j=await r.json();a=String(j.answer||'');cloud=j.engine==='cloud';risk=j.risk||null}}catch(e){}
+    finally{clearTimeout(tm)}
+  }
+  if(!a&&window.QuasarCore&&QuasarCore.ready){
+    const f=QuasarCore.answerFull?QuasarCore.answerFull(q,{lang:LANG,history:CH.hist.slice(-8)}):{text:QuasarCore.answer(q,{lang:LANG,history:CH.hist.slice(-8)}),res:null};
+    a=f.text;risk=f.res?{score:f.res.score,level:f.res.level,label:f.res.label,reasons:f.res.reasons,src:'device'}:null;
+  }
+  if(!a&&srvBase()){                                   // база не загрузилась: тот же движок на сервере CheckLink
+    try{const r=await fetch(srvBase()+'/api/public/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,lang:LANG,history:CH.hist.slice(-8,-1)})});const j=await r.json();a=j.answer||'';cloud=j.engine==='cloud';risk=j.risk||null}catch(e){}
+  }
+  a=a||t('kbFail');
+  if(risk&&LVC[risk.level]){
+    const rs=(risk.reasons||[]).map(x=>typeof x==='string'?x:x&&x.code!=='no_signals'?x.text:'').filter(Boolean).slice(0,3);
+    wait.insertAdjacentHTML('beforebegin',`<div class="m a rk"><span class="t ${LVC[risk.level]}">${esc(risk.label||'')}</span> <span class="mu">${esc(t('risk'))} ${Math.round(+risk.score||0)}%</span>${rs.map(x=>`<div class="mu" style="font-size:13px">• ${esc(x)}</div>`).join('')}<div class="rks">${esc(t(risk.src==='cloud'?'srcCloudS':risk.src==='server'?'srcServer':'srcDevice'))}</div></div>`);
+  }
+  wait.textContent=a;
+  wait.insertAdjacentHTML('afterend',`<div class="eng${cloud?' cl':''}"><i aria-hidden="true"></i>${esc(t(cloud?'eCloud':'eLocal'))}</div>`);
+  $('#log').scrollTop=1e9;
+  CH.hist.push({role:'assistant',content:a});CH.hist=CH.hist.slice(-20);
+}
+$('#askQ').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();const v=e.target.value;e.target.value='';ask(v)}});
+
+
+/* ---------------- Новые схемы: интерактивные модули ---------------- */
+const SC={open:-1,step:0,found:new Set(),ans:-1};
+const scDone=()=>{try{return new Set(JSON.parse(LS('cl_mods','[]')))}catch(e){return new Set()}};
+function scTopic(id){try{return QuasarCore.topics(LANG).find(x=>x.id===id)||null}catch(e){return null}}
+function renderSchemes(){
+  const g=$('#scGrid');if(!g)return;const d=scDone(),i=L();
+  g.innerHTML=MODS.map((m,k)=>`<button class="scc${d.has(m.id)?' done':''}" data-a="scOpen" data-v="${k}" aria-expanded="${SC.open===k}" aria-controls="scMod"><span class="sci" aria-hidden="true">${m.ic}</span><b>${esc(m.t[i])}</b><span class="scs">${d.has(m.id)?'✓ '+esc(t('scDone')):esc(t('scGo'))}</span></button>`).join('');
+  const n=MODS.filter(m=>d.has(m.id)).length;
+  $('#scProg').innerHTML=`<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${MODS.length}" aria-valuenow="${n}"><i style="width:${n/MODS.length*100}%"></i></div><span>${esc(tf('scProg',{n,m:MODS.length}))}</span>`;
+  if(SC.open>=0)scRender();
+}
+function scOpen(k){SC.open=k;SC.step=0;SC.found=new Set();SC.ans=-1;renderSchemes();const m=$('#scMod');m.classList.remove('hide');m.scrollIntoView({behavior:'smooth',block:'nearest'})}
+function scExample(m,live){
+  const i=L(),ex=m.ex[i],fr=m.fr[i];let parts=[{x:ex}];
+  fr.forEach((f,k)=>{parts=parts.flatMap(p=>{if(p.k!=null)return[p];const j=p.x.indexOf(f);return j<0?[p]:[{x:p.x.slice(0,j)},{x:f,k},{x:p.x.slice(j+f.length)}]})});
+  return `<div class="sbub"><span class="sfrom">${esc(m.from[i])}</span>${parts.map(p=>p.k==null?esc(p.x):live?`<span class="sfr${SC.found.has(p.k)?' on':''}" role="button" tabindex="0" data-a="scFrag" data-v="${p.k}">${esc(p.x)}</span>`:`<span${SC.found.has(p.k)?' class="sfr on"':''}>${esc(p.x)}</span>`).join('')}</div>`;
+}
+function scRender(){
+  const box=$('#scMod'),m=MODS[SC.open];if(!box||!m)return;
+  const i=L(),tp=scTopic(m.kb),st=SC.step,n=m.fr[i].length;
+  const dots=`<div class="scst" aria-hidden="true">${[0,1,2,3].map(k=>`<i class="${k<=st?'on':''}"></i>`).join('')}</div>`;
+  const head=`<div class="row" style="justify-content:space-between;align-items:center"><h3 style="margin:0">${m.ic} ${esc(m.t[i])}</h3><button class="b sm" data-a="scClose">${esc(t('scBack'))}</button></div>${dots}<p class="mu" style="font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.04em">${st+1}/4 · ${esc(t(['scS1','scS2','scS3','scS4'][st]))}</p>`;
+  let body='';
+  if(st===0)body=scExample(m,false)+`<div class="row" style="margin-top:12px"><button class="b bv" data-a="scStep">${esc(t('scNext'))} →</button></div>`;
+  else if(st===1){
+    const all=SC.found.size>=n;
+    body=`<p style="margin-bottom:8px">${esc(t('scFind'))} <b>${esc(tf('scFound',{n:SC.found.size,m:n}))}</b></p>`+scExample(m,true)
+      +(all&&tp?`<h3 style="margin-top:14px">${esc(t('scSigns'))}</h3><ul class="li">${tp.signs.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'')
+      +`<div class="row" style="margin-top:12px">${all?`<button class="b bv" data-a="scStep">${esc(t('scNext'))} →</button>`:`<button class="b sm" data-a="scShowAll">${esc(t('scShow'))}</button>`}</div>`;
+  }else if(st===2){
+    body=`<p style="font-weight:650;font-size:17px">${esc(m.q[i])}</p><div class="sopt">${m.o.map(([tx,ok],k)=>`<button data-a="scAns" data-v="${k}"${SC.ans>=0?' disabled':''} class="${SC.ans<0?'':ok?'ok':k===SC.ans?'no':''}">${SC.ans>=0&&ok?'✓ ':SC.ans===k&&!ok?'✗ ':''}${esc(tx[i])}</button>`).join('')}</div>`
+      +(SC.ans>=0?`<div class="fb ${m.o[SC.ans][1]?'ok':'no'}"><b>${esc(t(m.o[SC.ans][1]?'scRight':'scWrong'))}</b> ${esc(m.x[i])}</div><div class="row" style="margin-top:12px"><button class="b bv" data-a="scStep">${esc(t('scNext'))} →</button></div>`:'');
+  }else{
+    const nx=MODS.findIndex((x,k)=>k>SC.open&&!scDone().has(x.id)),allDone=MODS.every(x=>scDone().has(x.id));
+    body=(tp?`<h3>${esc(t('scSteps'))}</h3><ol class="st">${tp.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:'')
+      +`<p class="scok">✓ ${esc(t('scComplete'))}</p>`+(allDone?`<p class="mu" style="margin-top:6px">🏅 ${esc(t('scAll'))}</p>`:'')
+      +`<div class="row" style="margin-top:12px">${nx>=0?`<button class="b bv" data-a="scOpen" data-v="${nx}">${esc(t('scNextMod'))} →</button>`:''}<button class="b" data-a="scClose">${esc(t('scBack'))}</button></div>`;
+  }
+  box.innerHTML=head+body;
+}
+function scMark(){const d=scDone();d.add(MODS[SC.open].id);SS('cl_mods',JSON.stringify([...d]));}
+
+/* ---------------- Мошенничество в цифрах (официальная статистика) ---------------- */
+function renderNumbers(){
+  const g=$('#nmGrid');if(!g)return;const max=30;
+  g.innerHTML=`<div class="c nmt"><b>${esc(t('nm1'))}</b><span>${esc(t('nm1d'))}</span></div><div class="c nmt"><b>${esc(t('nm2'))}</b><span>${esc(t('nm2d'))}</span></div>
+  <div class="c nmb"><h3>${esc(t('nmBarsH'))}</h3><div class="bars" id="nmBars">${NUM_BARS.map(([k,v,n],j)=>{const lab=t(k),val=String(v).replace('.',LANG==='en'?'.':',')+'%',tip=val+(n?' · '+tf('nmCases',{n:LANG==='en'?n.replace(',','.'):n}):'');return `<div class="brw" tabindex="0" data-tip="${esc(lab+': '+tip)}" aria-label="${esc(lab+': '+tip)}"><span class="bl">${esc(lab)}</span><div class="brt"><i style="width:${v/max*100}%;animation-delay:${j*120}ms"></i></div><span class="brv">${esc(val)}</span></div>`}).join('')}
+    <div class="bax" aria-hidden="true"><div><span>0%</span><span>10%</span><span>20%</span><span>30%</span></div><span></span></div></div>
+    <p class="mu nms">${esc(t('nmSrc'))} <a href="${NUM_SRC}" target="_blank" rel="noopener noreferrer">finratings.kz</a></p></div>`;
+  const bars=$('#nmBars');let tip=null;
+  const show=el=>{if(!tip){tip=document.createElement('div');tip.className='btip';bars.appendChild(tip)}const r=el.querySelector('.brt i').getBoundingClientRect(),b=bars.getBoundingClientRect();tip.textContent=el.dataset.tip;tip.style.top=(r.top-b.top)+'px';tip.hidden=false};
+  const hide=()=>{if(tip)tip.hidden=true};
+  bars.querySelectorAll('.brw').forEach(el=>{el.addEventListener('mouseenter',()=>show(el));el.addEventListener('focus',()=>show(el));el.addEventListener('mouseleave',hide);el.addEventListener('blur',hide)});
+}
+
+/* ---------------- Словарь ---------------- */
+const GL={open:-1};
+function renderGlossary(){
+  const g=$('#gls');if(!g)return;const i=L();
+  g.innerHTML=GLOS.map(([w],k)=>`<button data-a="glOpen" data-v="${k}" aria-expanded="${GL.open===k}" aria-controls="gld">${esc(w[i])}</button>`).join('');
+  $('#gld').innerHTML=GL.open>=0?`<div class="gld"><b>${esc(GLOS[GL.open][0][i])}</b> — ${esc(GLOS[GL.open][1][i])}</div>`:'';
+}
+
+/* ---------------- Тур для новичков: 4 шага, один раз ---------------- */
+const TOUR=[['#check .tabs','tour1'],['#schemes','tour2'],['#ask','tour3'],['#help','tour4']];
+const TR16={i:-1};
+function tourShow(i){
+  $$('.tour-on').forEach(x=>x.classList.remove('tour-on'));
+  const box=$('#tour');if(i<0||i>=TOUR.length){box.hidden=true;TR16.i=-1;SS('cl_tour','1');return}
+  TR16.i=i;const el=$(TOUR[i][0]);if(el){el.classList.add('tour-on');el.scrollIntoView({behavior:'smooth',block:'start'})}
+  const last=i===TOUR.length-1;
+  box.innerHTML=`<div class="row" style="align-items:center"><b id="tourT">CheckLink · ${i+1}/${TOUR.length}</b><div class="tdots">${TOUR.map((x,k)=>`<i class="${k===i?'on':''}"></i>`).join('')}</div></div><p>${esc(t(TOUR[i][1]))}</p>
+    <div class="row"><button class="b sm" data-a="tourX">${esc(t('tourSkip'))}</button><button class="b bv sm" data-a="tourN">${esc(t(last?'tourDone':'tourNext'))}</button></div>`;
+  box.hidden=false;
+}
+
+/* ---------------- общие клики ---------------- */
+document.addEventListener('click',async e=>{
+  const a=e.target.closest('[data-a],[data-ex],[data-exs],[data-copy],[data-q],[data-an],[data-anat]');if(!a)return;
+  if(a.dataset.ex!=null){$('#ckLink').value=a.dataset.ex;checkLink(a.dataset.ex);return}
+  if(a.dataset.exs!=null){const v=EXS[+a.dataset.exs][L()];$('#ckSms').value=v;checkSms(v);return}
+  if(a.dataset.q!=null){ask(a.dataset.q);return}
+  if(a.dataset.an!=null){$('#anIn').value=a.dataset.an;anRun(a.dataset.an);return}
+  if(a.dataset.anat!=null){$('#anIn').value=a.dataset.anat;anRun(a.dataset.anat);$('#tools').scrollIntoView({block:'start'});return}
+  if(a.dataset.copy!=null){try{await navigator.clipboard.writeText(a.dataset.copy);toast(t('copied'))}catch(x){}return}
+  const k=a.dataset.a;
+  if(k==='openApp')openApp();
+  else if(k==='theme'){const m=LS('cl_site_theme','system');SS('cl_site_theme',THEMES[(THEMES.indexOf(m)+1)%3]);applyTheme()}
+  else if(k==='ckLink')checkLink($('#ckLink').value);
+  else if(k==='ckSms')checkSms($('#ckSms').value);
+  else if(k==='pasteLink')pasteTo('#ckLink',checkLink);
+  else if(k==='pasteSms')pasteTo('#ckSms',checkSms);
+  else if(k==='anGo')anRun($('#anIn').value);
+  else if(k==='pwEye'){const i=$('#pwIn');i.type=i.type==='password'?'text':'password'}
+  else if(k==='pwGen'){const p=pwGenerate(),i=$('#pwIn');i.value=p;i.type='text';pwRun();try{await navigator.clipboard.writeText(p);toast(t('pwNew')+' '+p)}catch(x){}}
+  else if(k==='qStart'){if(window.QuasarCore&&QuasarCore.ready)qStart();else toast(t('kbFail'))}
+  else if(k==='qNext'){if(QZ.i+1<QZ.list.length){QZ.i++;qRender()}else qResult()}
+  else if(k==='qShare')qShare();
+  else if(k==='moreTips'){KB.tipOff+=6;renderTips()}
+  else if(k==='ask'){const v=$('#askQ').value;$('#askQ').value='';ask(v)}
+  else if(k==='openSite'){e.preventDefault();const u=srvBase()+'/';if(!openExt(u))location.href=u}
+  else if(k==='ckCall')checkCall($('#ckCall').value);
+  else if(k==='callCh')callToggle(+a.dataset.v);
+  else if(k==='callClr'){$('#ckCall').value='';renderCallCh();$('#ckOut').innerHTML=''}
+  else if(k==='cloudCk')cloudCheck();
+  else if(k==='scOpen')scOpen(+a.dataset.v);
+  else if(k==='scClose'){SC.open=-1;$('#scMod').classList.add('hide');renderSchemes();$('#schemes').scrollIntoView({behavior:'smooth',block:'start'})}
+  else if(k==='scStep'){SC.step=Math.min(3,SC.step+1);if(SC.step===3)scMark();renderSchemes()}
+  else if(k==='scFrag'){SC.found.add(+a.dataset.v);scRender()}
+  else if(k==='scShowAll'){MODS[SC.open].fr[L()].forEach((x,j)=>SC.found.add(j));scRender()}
+  else if(k==='scAns'){if(SC.ans<0){SC.ans=+a.dataset.v;scRender()}}
+  else if(k==='glOpen'){const v=+a.dataset.v;GL.open=GL.open===v?-1:v;renderGlossary()}
+  else if(k==='tour'){e.preventDefault();tourShow(0)}
+  else if(k==='newsX'){SS('cl_news','1.8');$('#news').hidden=true}
+  else if(k==='newsShow'){e.preventDefault();const n=$('#news');n.hidden=false;const d=n.querySelector('details');if(d)d.open=true;scrollTo({top:0,behavior:'smooth'})}
+  else if(k==='pwa')pwaInstall();
+  else if(k==='tourN')tourShow(TR16.i+1);
+  else if(k==='tourX')tourShow(-1);
+});
+/* подсветка раздела в меню (сверху на компьютере, снизу на телефоне) */
+const io='IntersectionObserver' in window?new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting)$$('nav.nv a,nav.bn a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+x.target.id))}),{rootMargin:'-45% 0px -50% 0px'}):null;
+if(io)['check','tools','trainer','schemes','kb','ask','help'].forEach(id=>io.observe(document.getElementById(id)));
+
+/* ---------------- 1.7.0: «Что нового», установка сайта как приложения (PWA), ссылки сервера ---------------- */
+let PWA=null;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();PWA=e;const b=$('#pwaB');if(b&&!EMB)b.hidden=false});
+addEventListener('appinstalled',()=>{PWA=null;const b=$('#pwaB');if(b)b.hidden=true;toast(t('pwaOk'))});
+async function pwaInstall(){
+  if(PWA){const p=PWA;PWA=null;try{await p.prompt();await p.userChoice}catch(e){}const b=$('#pwaB');if(b)b.hidden=true;return}
+  if(ENV.ios)toast(t('pwaIos'));
+}
+function newsInit(){
+  const n=$('#news');if(!n||EMB)return;
+  n.hidden=LS('cl_news','')==='1.8';
+  if(ENV.ios&&!matchMedia('(display-mode: standalone)').matches&&!EMB){const b=$('#pwaB');if(b)b.hidden=false}   // iPhone: подсказка «На экран Домой»
+}
+async function srvLinks(){                     // сайт не на сервере CheckLink (статический хостинг): ссылки ведут на сервер
+  if(PC.static&&PC.server&&!EMB){const s0=String(PC.server).replace(/\/+$/,''),pl=$('#privL'),dl=$('#delL');if(pl)pl.href=s0+'/privacy?lang='+LANG;if(dl)dl.href=s0+'/account/delete?lang='+LANG}
+  await srvCheck();const b=srvBase();if(!b||EMB)return;
+  const pl=$('#privL'),dl=$('#delL');if(pl)pl.href=b+'/privacy?lang='+LANG;if(dl)dl.href=b+'/account/delete?lang='+LANG;
+  if(SRV.ver){const v=$('#verN');if(v)v.textContent=SRV.ver}
+}
+
+/* ---------------- запуск ---------------- */
+if(EMB){const b=$('#backApp');if(b)b.href=PC.appUrl||'../index.html'}
+if(clipOk())$$('.clip').forEach(b=>b.classList.remove('hide'));
+applyTheme();applyLang();quizIntro();
+if(window.QuasarCore)QuasarCore.load().then(()=>{renderKb();renderTips();renderAskEx();renderStats();renderSchemes();if(AN.last)anRun(AN.last)}).catch(()=>{
+  $('#kbGrid').innerHTML=`<p class="mu">${esc(t('kbFail'))}</p>`;renderAskExOffline();
+});
+function renderAskExOffline(){$('#askEx').innerHTML='';$('#log').innerHTML='';addMsg('a',t('askHi'))}
+srvCheck();newsInit();srvLinks();
+$('#ckCall').addEventListener('input',()=>renderCallCh());
+$('#scMod').addEventListener('keydown',e=>{const f=e.target.closest&&e.target.closest('.sfr[role="button"]');if(f&&(e.key==='Enter'||e.key===' ')){e.preventDefault();f.click()}});
+if(LS('cl_tour','')!=='1'&&!EMB)setTimeout(()=>{if(TR16.i<0&&!document.hidden)tourShow(0)},1500);   // первый визит: короткий тур
+/* Офлайн-режим сайта: сервис-воркер кэширует страницу, базу знаний и движок (только на самом сайте, не в приложении) */
+if('serviceWorker' in navigator&&!EMB&&location.protocol==='https:')addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})});
+</script>
+</body>
+</html>

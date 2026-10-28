@@ -1,0 +1,23 @@
+{
+ "available": true,
+ "version": "1.7.0",
+ "size": 5165673,
+ "sha256": "7962c4cc857837bf629dd038e8cbdedcf79c2d9bc23d29b8b83753b01bb5eb64",
+ "updated": "2026-10-28",
+ "url": "https://aianturlybek14-alt.github.io/checklink/download/CheckLink-1.7.0.apk",
+ "page": "https://aianturlybek14-alt.github.io/checklink/download/",
+ "package": "com.quasar.shield",
+ "scheme": "checklink",
+ "play": null,
+ "kb": {
+  "version": 6,
+  "rev": 1,
+  "min_core": 5,
+  "size": 431711,
+  "sha256": "1bf048578b326ca51b6c6039fe29ddd1977f428a70f8c0d4dc987fbcb8a1038c",
+  "url": "https://aianturlybek14-alt.github.io/checklink/quasar-kb.json"
+ },
+ "privacy": "https://checkthelink.onrender.com/privacy",
+ "source": "pages",
+ "built": "2026-10-28 04:10 UTC"
+}
