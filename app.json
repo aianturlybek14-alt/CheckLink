@@ -1,23 +1,23 @@
 {
  "available": true,
- "version": "1.8.1",
- "size": 5253144,
- "sha256": "8c43a23e0ecd2eab52abd801dd6e152b88766db4c32b24a2fd34e45eb5c3f6c8",
+ "version": "1.8.0",
+ "size": 5246414,
+ "sha256": "fdffc441cba9c9d2ab22d9d3b9b8941c37c7d404cffcc4ec41e412c1c0ef2eed",
  "updated": "2026-10-28",
- "url": "https://aianturlybek14-alt.github.io/CheckLink/download/CheckLink-1.8.1.apk",
+ "url": "https://aianturlybek14-alt.github.io/CheckLink/download/CheckLink-1.8.0.apk",
  "page": "https://aianturlybek14-alt.github.io/CheckLink/download/",
  "package": "com.quasar.shield",
  "scheme": "checklink",
  "play": null,
  "kb": {
   "version": 6,
-  "rev": 2,
+  "rev": 3,
   "min_core": 5,
-  "size": 439288,
-  "sha256": "4ecbf88255d65129aed55887fc6808e8005399dab068254726aaa4a3e84514d0",
+  "size": 442598,
+  "sha256": "7d8619fcb69df9bdb7919a45c5a7a3971e86e7810fd93626a744e2b2c4ea0112",
   "url": "https://aianturlybek14-alt.github.io/CheckLink/quasar-kb.json"
  },
  "privacy": "https://checkthelink.onrender.com/privacy",
  "source": "pages",
- "built": "2026-10-28 05:46 UTC"
+ "built": "2026-10-28 17:21 UTC"
 }
