@@ -1,6 +1,6 @@
 # CheckLink — сайт на GitHub Pages
 
-https://aianturlybek14-alt.github.io/checklink/
+https://aianturlybek14-alt.github.io/CheckLink/
 
 Статическая копия веб-портала CheckLink: проверка ссылок, сообщений, QR-кодов и файлов работает прямо в браузере. Здесь только файлы сайта (без кода сервера, ключей и паролей).
 Собрано командой `python tools/build_pages.py` из основного проекта.
