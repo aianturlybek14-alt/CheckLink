@@ -1,10 +1,10 @@
 {
  "available": true,
- "version": "1.8.0",
- "size": 5246414,
- "sha256": "fdffc441cba9c9d2ab22d9d3b9b8941c37c7d404cffcc4ec41e412c1c0ef2eed",
+ "version": "1.8.1",
+ "size": 5253144,
+ "sha256": "8c43a23e0ecd2eab52abd801dd6e152b88766db4c32b24a2fd34e45eb5c3f6c8",
  "updated": "2026-10-28",
- "url": "https://aianturlybek14-alt.github.io/CheckLink/download/CheckLink-1.8.0.apk",
+ "url": "https://aianturlybek14-alt.github.io/CheckLink/download/CheckLink-1.8.1.apk",
  "page": "https://aianturlybek14-alt.github.io/CheckLink/download/",
  "package": "com.quasar.shield",
  "scheme": "checklink",
@@ -19,5 +19,5 @@
  },
  "privacy": "https://checkthelink.onrender.com/privacy",
  "source": "pages",
- "built": "2026-10-28 05:30 UTC"
+ "built": "2026-10-28 05:46 UTC"
 }
