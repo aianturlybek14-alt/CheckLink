@@ -11,13 +11,20 @@
  "play": null,
  "kb": {
   "version": 6,
-  "rev": 4,
+  "rev": 5,
   "min_core": 5,
-  "size": 445041,
-  "sha256": "bb49351e2b2b4529d58e9f90c661149f4842b8c7a2c63810d4ac5e294cc9ce51",
+  "size": 445553,
+  "sha256": "ebd114325570423a3bd32a881ee23c78b833f485306a23f5d2e6ae8e4b6547e4",
   "url": "https://aianturlybek14-alt.github.io/CheckLink/quasar-kb.json"
  },
  "privacy": "https://checkthelink.onrender.com/privacy",
  "source": "pages",
- "built": "2026-10-28 18:16 UTC"
+ "sem": {
+  "rev": 1,
+  "min_core": 8,
+  "size": 1177503,
+  "sha256": "0848d75f9a8668d9b9162ba06c5d6ef48c86820f66f28a4d3b0bc94918395f85",
+  "url": "https://aianturlybek14-alt.github.io/CheckLink/quasar-sem.json"
+ },
+ "built": "2026-10-28 19:02 UTC"
 }

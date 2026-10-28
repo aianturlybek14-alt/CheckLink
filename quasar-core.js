@@ -10,7 +10,7 @@
   'use strict';
   var LANGS = ['ru', 'kk', 'en'];
   var KB = null, RX = null, loading = null;
-  var CORE = 7;   // версия движка: база знаний с min_core > CORE этому движку не подходит (обновление правил «по воздуху»)
+  var CORE = 8;   // версия движка: база знаний с min_core > CORE этому движку не подходит (обновление правил «по воздуху»)
   var KK_RE = /[әғқңөұүһіӘҒҚҢӨҰҮҺІ]/g, CYR_RE = /[а-яёА-ЯЁ]/g, LAT_RE = /[a-zA-Z]/g;
   var EN_STOP = ['the', 'is', 'are', 'what', 'how', 'why', 'my', 'me', 'you', 'your', 'this', 'it', 'i', 'to', 'a', 'an', 'and', 'of',
     'in', 'from', 'can', 'should', 'do', 'does', 'hello', 'hi', 'hey', 'thanks', 'thank', 'please', 'scam', 'help', 'someone', 'got'];
@@ -45,7 +45,12 @@
     loading = fetch(u, { cache: 'no-cache' }).then(function (r) {
       if (!r.ok) throw new Error('kb_http_' + r.status);
       return r.json();
-    }).then(function (j) { init(j); return KB; }).catch(function (e) { loading = null; throw e; });
+    }).then(function (j) {
+      init(j);
+      if (!SEM && typeof fetch === 'function') fetch(root.QUASAR_SEM_URL || (BASE + 'quasar-sem.json'), { cache: 'no-cache' })
+        .then(function (r) { return r.ok ? r.json() : null; }).then(function (s) { if (s) semInit(s); }).catch(function () { });
+      return KB;
+    }).catch(function (e) { loading = null; throw e; });
     return loading;
   }
   function init(j) {
@@ -232,13 +237,82 @@
     return [flags.reduce(function (s, c) { return s + W[c]; }, 0), flags];
   }
   function levelOf(score) { var t = KB.rules.levels_at; return score >= t.dangerous ? 'dangerous' : score >= t.suspicious ? 'suspicious' : 'low'; }
-  function result(level, score, codes, urls, lg, mlHit) {
+  function result(level, score, codes, urls, lg, mlHit, semFam) {
     var R = KB.rules;
     var out = { level: level, score: score, label: tr(R.levels[level], lg),
-      reasons: codes.map(function (c) { return { code: c, text: mlHit && c === mlHit[0] ? mlReason(c, mlHit[1], lg) : tr(R.reasons[c], lg) }; }),
+      reasons: codes.map(function (c) { return { code: c, text: mlHit && c === mlHit[0] ? mlReason(c, mlHit[1], lg) : c === 'sem_match' ? semReason(semFam, lg) : tr(R.reasons[c], lg) }; }),
       advice: tr(R.advice[level], lg).slice(), urls: urls, disclaimer: tr(R.disclaimer, lg) };
     if (mlHit && mlHit[1].length) out.ml_words = mlHit[1].slice();
     return out;
+  }
+  /* ---------------- 1.8.3: семантический слой (тот же расчёт, что analyzer.sem_score) ----------------
+     Текст -> признаки (фрагменты 3-5 букв, слова, пары слов) -> FNV-1a по UTF-8 -> корзина и знак -> сумма строк
+     int8-матрицы W (целые числа) -> косинус с прототипами схем и обычных сообщений. Данные - quasar-sem.json
+     (рядом с базой или «по воздуху» с GitHub Pages). Нет файла - слой просто не работает, правила и модель остаются. */
+  var SEM = null, SEM_W = 25;
+  function b64i8(b64) {
+    var bin = typeof atob === 'function' ? atob(b64) : Buffer.from(b64, 'base64').toString('binary');
+    var u = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    return new Int8Array(u.buffer);
+  }
+  function semInit(j) {
+    if (!j || !j.W || !j.P || !j.lab || (+j.min_core || 0) > CORE) return false;
+    if (SEM && (+j.rev || 0) < SEM.rev) return false;              // не откатываемся на старую базу смыслов
+    var dim = j.dim, P = b64i8(j.P), n = j.lab.length, pn = new Float64Array(n);
+    for (var k = 0; k < n; k++) { var a = 0; for (var d = 0; d < dim; d++) { var v = P[k * dim + d]; a += v * v; } pn[k] = Math.sqrt(a); }
+    SEM = { rev: +j.rev || 0, dim: dim, mask: j.buckets - 1, W: b64i8(j.W), P: P, pn: pn, lab: j.lab, fam: j.fam, t: j.t,
+      lo: j.n[0], hi: j.n[1], minw: j.min_words || 3 };
+    return true;
+  }
+  function fnv(str) {
+    var h = 2166136261;
+    for (var ch of str) {
+      var c = ch.codePointAt(0), b;
+      if (c < 0x80) b = [c];
+      else if (c < 0x800) b = [0xc0 | (c >> 6), 0x80 | (c & 63)];
+      else if (c < 0x10000) b = [0xe0 | (c >> 12), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63)];
+      else b = [0xf0 | (c >> 18), 0x80 | ((c >> 12) & 63), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63)];
+      for (var i = 0; i < b.length; i++) h = Math.imul(h ^ b[i], 16777619) >>> 0;
+    }
+    return h;
+  }
+  function semFeats(s, lo, hi) {
+    var out = new Set(), prev = null;
+    mlWords(s).forEach(function (w) {
+      out.add('w ' + w);
+      mlGrams(w, lo, hi).forEach(function (g) { out.add(g); });
+      if (prev !== null) out.add('b ' + prev + ' ' + w);
+      prev = w;
+    });
+    return Array.from(out);
+  }
+  function semScore(s) {
+    var S = SEM;
+    if (!S || mlWords(s).length < S.minw) return null;
+    var q = new Int32Array(S.dim), hit = false, d;
+    semFeats(s, S.lo, S.hi).forEach(function (f) {
+      var h = fnv(f), r = (h & S.mask) * S.dim, sg = h >>> 31 ? -1 : 1;
+      for (d = 0; d < S.dim; d++) q[d] += sg * S.W[r + d];
+      hit = true;
+    });
+    var nq = 0;
+    for (d = 0; d < S.dim; d++) nq += q[d] * q[d];
+    if (!hit || !nq) return null;
+    nq = Math.sqrt(nq);
+    var b1 = -1, b0 = -1, fam = -1;
+    for (var k = 0; k < S.lab.length; k++) {
+      var dot = 0, o = k * S.dim;
+      for (d = 0; d < S.dim; d++) dot += q[d] * S.P[o + d];
+      var c = dot / (nq * S.pn[k]);
+      if (S.lab[k] >= 0) { if (c > b1) { b1 = c; fam = S.lab[k]; } } else if (c > b0) b0 = c;
+    }
+    var t = S.t[script(s)];
+    return [b1 >= t.tau && b1 - b0 >= t.margin, b1, b0, fam];
+  }
+  function semReason(fam, lg) {
+    var f = SEM && SEM.fam[fam] ? SEM.fam[fam][{ ru: 0, kk: 1, en: 2 }[lg] || 0] : '';
+    return tr(KB.rules.reasons.sem_match, lg).replace('{f}', f);
   }
   /* ---------------- 1.8.0: модель на устройстве (тот же расчёт, что analyzer.ml_score) ---------------- */
   var ND = /\p{Nd}/u, LN = /[\p{L}\p{N}]/u;
@@ -295,7 +369,7 @@
   /* type: link | qr | sms | call. Результат как у сервера: {level, score, label, reasons[{code,text}], advice[], urls[], disclaimer} */
   function check(type, content, lang) {
     need();
-    var lg = pickLang(lang), codes = [], score = 0, urls = [], mlHit = null;
+    var lg = pickLang(lang), codes = [], score = 0, urls = [], mlHit = null, semFam = -1;
     content = String(content || '').trim();
     if (type === 'call' && /^[+\d\s()\-]{3,20}$/.test(content) && content.replace(/\D/g, '').length >= 3) {
       var ph = phoneCheck(content);
@@ -329,11 +403,15 @@
         else if (z < t.weak && tk.length === 1 && tc.money && !us && !lw) { codes[codes.indexOf('money')] = 'money_verify'; score = Math.min(score, C.money_cap); }
         else if (z <= t.calm && tk.length === 1 && C.calm_rules.indexOf(tk[0]) >= 0 && !us && !lw) { score = Math.max(score - C.calm, 0); codes.push('ml_calm'); }
       }
+      if (SEM && codes.indexOf('money_verify') < 0 && type !== 'link') {
+        var sm = semScore(b[0]);
+        if (sm && sm[0]) { score += SEM_W; codes.push('sem_match'); semFam = sm[3]; }
+      }
       if ((a[1] || b[1]) && !codes.length) codes = ['warning_text'];
     }
     score = Math.min(score, 100);
     if (!codes.length) codes = ['no_signals'];
-    return result(levelOf(score), score, codes, urls, lg, mlHit);
+    return result(levelOf(score), score, codes, urls, lg, mlHit, semFam);
   }
 
   /* ---------------- проверка файла ---------------- */
@@ -609,7 +687,7 @@
   function tips(lang) { need(); var lg = pickLang(lang); return KB.tips.map(function (t) { return tr(t, lg); }); }
 
   var api = { load: load, init: init, get ready() { return !!KB; }, get kb() { return KB; }, version: function () { return KB ? KB.version : 0; },
-    rev: function () { return KB ? (KB.rev || 0) : 0; }, core: CORE, fold: function (t) { need(); return fold(cleanText(String(t || ''))[0]); },
+    rev: function () { return KB ? (KB.rev || 0) : 0; }, core: CORE, semInit: semInit, semRev: function () { return SEM ? SEM.rev : 0; }, fold: function (t) { need(); return fold(cleanText(String(t || ''))[0]); },
     check: check, checkFile: checkFile, fileInfo: fileInfo, answer: answer, answerFull: answerFull, highlight: highlight, password: password, detectLang: detectLang, quiz: quiz, topics: topics, tips: tips,
     phrase: function (k, lang) { need(); return P(k, pickLang(lang)); }, _analyzeUrl: function (u) { need(); return analyzeUrl(u); } };
   root.QuasarCore = api;
