@@ -265,8 +265,8 @@ nav.bn{display:none}
 </div></header>
 
 <div class="news no-emb" id="news" role="region" aria-labelledby="newsT" hidden><div class="wrap">
-  <span class="t v">1.8</span>
-  <div class="nwx"><b id="newsT" data-t="newsT">Новое в CheckLink 1.8</b><span data-t="newsD">Вторая линия защиты в браузере и на телефоне, вход по нику и шифрование личных данных.</span>
+  <span class="t v">1.8.3</span>
+  <div class="nwx"><b id="newsT" data-t="newsT">Новое в CheckLink 1.8.3</b><span data-t="newsD">Семантический анализатор: узнаёт схему мошенников по смыслу, даже когда слова другие.</span>
     <details><summary class="mu" style="font-size:13px;cursor:pointer" data-t="newsMore">Что изменилось</summary><ul><li data-t="news1"></li><li data-t="news2"></li><li data-t="news3"></li><li data-t="news4"></li></ul></details></div>
   <button class="b sm ib" data-a="newsX" aria-label="✕" title="✕">✕</button>
 </div></div>
@@ -355,7 +355,7 @@ nav.bn{display:none}
       <div class="log" id="log" aria-live="polite"></div>
       <div class="row" id="askEx" style="margin-bottom:8px"></div>
       <div class="row" style="flex-wrap:nowrap"><textarea id="askQ" rows="1" maxlength="4000" placeholder="Вопрос или текст сообщения…" aria-label="Вопрос"></textarea><button class="b bv" data-a="ask" aria-label="Отправить" style="flex:0 0 52px">➤</button></div>
-      <label class="mu ccb" style="display:flex;gap:8px;align-items:flex-start;margin-top:8px;font-size:13px"><input type="checkbox" id="cloudOk" style="margin-top:3px;flex:0 0 auto"><span data-t="cloudOk">Использовать облачный ИИ Google Gemini. Текст уйдёт за пределы Казахстана; номера карт и телефонов, ИИН, коды и пароли из него удаляются. Без галочки отвечает QuasarAI в браузере.</span></label>
+      <label class="mu ccb" style="display:flex;gap:8px;align-items:flex-start;margin-top:8px;font-size:13px"><input type="checkbox" id="cloudOk" style="margin-top:3px;flex:0 0 auto;width:auto;height:auto"><span data-t="cloudOk">Использовать облачный ИИ Google Gemini. Текст уйдёт за пределы Казахстана; номера карт и телефонов, ИИН, коды и пароли из него удаляются. Без галочки отвечает QuasarAI в браузере.</span></label>
     </div>
   </section>
 
@@ -417,13 +417,13 @@ const T={
   apD:['Проверяйте сообщения прямо из WhatsApp и Telegram: «Поделиться» → «Проверить в CheckLink». Сканер QR, Щит и чат QuasarAI всегда под рукой.','Хабарламаларды тікелей WhatsApp пен Telegram-нан тексеріңіз: «Бөлісу» → «CheckLink-те тексеру». QR сканері, Қалқан және QuasarAI чаты әрдайым қолыңызда.','Check messages right from WhatsApp and Telegram: “Share” → “Check in CheckLink”. The QR scanner, Shield and QuasarAI chat are always at hand.'],
   webApp:['Веб-версия','Веб-нұсқа','Web version'],
   apDl:['Скачать APK','APK жүктеу','Download APK'],
-  newsT:['Новое в CheckLink 1.8','CheckLink 1.8 жаңалықтары','New in CheckLink 1.8'],
-  newsD:['Вторая линия защиты в браузере и на телефоне, вход по нику и шифрование личных данных.','Браузер мен телефондағы екінші қорғаныс желісі, никпен кіру және жеке деректерді шифрлау.','A second line of defence in the browser and on the phone, nickname sign-in and encrypted personal data.'],
+  newsT:['Новое в CheckLink 1.8.3','CheckLink 1.8.3 жаңалықтары','New in CheckLink 1.8.3'],
+  newsD:['Семантический анализатор: узнаёт схему мошенников по смыслу, даже когда слова другие.','Семантикалық талдағыш: сөздері басқа болса да, алаяқтық схемасын мағынасы бойынша таниды.','A semantic analyzer: recognises a scam scheme by its meaning, even when the words are different.'],
   newsMore:['Что изменилось','Не өзгерді','What changed'],
-  news1:['Модель CheckLink работает прямо в браузере после правил: ловит новые формулировки, опечатки и сленг. Проверена на 5574 настоящих SMS и тысячах обычных фраз из открытых наборов.','CheckLink моделі ережелерден кейін тікелей браузерде жұмыс істейді: жаңа тұжырымдарды, қателер мен сленгті ұстайды. Ашық жинақтардағы 5574 нақты SMS пен мыңдаған кәдімгі сөйлеммен тексерілді.','The CheckLink model runs right in the browser after the rules: it catches new wording, typos and slang. Tested on 5,574 real SMS and thousands of ordinary sentences from open datasets.'],
-  news2:['Просьба знакомого «переведи денег» без других признаков — не тревога, а совет: позвоните ему и проверьте.','Таныстың «ақша аудар» деген өтініші басқа белгілерсіз — дабыл емес, кеңес: қоңырау шалып, тексеріңіз.','A friend asking “send me money” with no other signs is not an alarm but advice: call them and check.'],
-  news3:['Приложение: вход по нику без почты, имя, возраст и чаты шифруются на телефоне. Облачный ИИ — только с вашего согласия.','Қолданба: поштасыз никпен кіру, есім, жас және чаттар телефонда шифрланады. Бұлттық ЖИ — тек келісіміңізбен.','App: nickname sign-in without email; name, age and chats are encrypted on the phone. Cloud AI only with your consent.'],
-  news4:['Сайт теперь и на GitHub Pages: открывается сразу, без ожидания сервера, и работает без интернета после первого визита.','Сайт енді GitHub Pages-те де бар: серверді күтпей бірден ашылады және алғашқы кіруден кейін интернетсіз жұмыс істейді.','The website is now also on GitHub Pages: it opens instantly without waiting for the server and works offline after the first visit.'],
+  news1:['Третий слой проверки в браузере и на телефоне: текст превращается в 48 чисел и сравнивается с 1890 образцами схем. База 1,2 МБ, проверка около 1 мс, без интернета.','Браузер мен телефондағы үшінші тексеру қабаты: мәтін 48 санға айналып, 1890 схема үлгісімен салыстырылады. Базасы 1,2 МБ, тексеру шамамен 1 мс, интернетсіз.','A third layer in the browser and on the phone: the text becomes 48 numbers and is compared with 1,890 scheme samples. 1.2 MB, about 1 ms, no internet needed.'],
+  news2:['Кнопка «CheckLink ошибся?» помогает учиться: похожие жалобы группируются, и новая схема приходит на все телефоны без нового приложения.','«CheckLink қателесті ме?» батырмасы үйренуге көмектеседі: ұқсас шағымдар топталып, жаңа схема барлық телефонға жаңа қолданбасыз келеді.','The "CheckLink was wrong?" button helps it learn: similar reports are grouped and a new scheme reaches every phone without a new app.'],
+  news3:['Ваши тексты не собираются: жалоба очищается на телефоне, в базу попадают только числа из групп от трёх похожих жалоб.','Мәтіндеріңіз жиналмайды: шағым телефонда тазаланады, базаға тек үш ұқсас шағымнан тұратын топтардың сандары түседі.','Your texts are not collected: a report is cleaned on the phone and only numbers from groups of three or more similar reports enter the base.'],
+  news4:['Обновления правил и базы смыслов приходят с GitHub Pages и проверяются по SHA-256.','Ережелер мен мағына базасының жаңартулары GitHub Pages-тен келіп, SHA-256 арқылы тексеріледі.','Updates of the rules and the meaning base come from GitHub Pages and are verified with SHA-256.'],
   pwa:['Установить без APK','APK-сыз орнату','Install without APK'],pwaIos:['На iPhone: «Поделиться» → «На экран «Домой»».','iPhone-да: «Бөлісу» → «Басты экранға қосу».','On iPhone: Share → Add to Home Screen.'],
   pwaOk:['CheckLink добавлен на главный экран','CheckLink басты экранға қосылды','CheckLink was added to the home screen'],
   verL:['Версия','Нұсқа','Version'],privL:['Политика конфиденциальности','Құпиялылық саясаты','Privacy policy'],delL:['Удалить аккаунт','Аккаунтты жою','Delete account'],
@@ -1286,7 +1286,7 @@ document.addEventListener('click',async e=>{
   else if(k==='scAns'){if(SC.ans<0){SC.ans=+a.dataset.v;scRender()}}
   else if(k==='glOpen'){const v=+a.dataset.v;GL.open=GL.open===v?-1:v;renderGlossary()}
   else if(k==='tour'){e.preventDefault();tourShow(0)}
-  else if(k==='newsX'){SS('cl_news','1.8');$('#news').hidden=true}
+  else if(k==='newsX'){SS('cl_news','1.8.3');$('#news').hidden=true}
   else if(k==='newsShow'){e.preventDefault();const n=$('#news');n.hidden=false;const d=n.querySelector('details');if(d)d.open=true;scrollTo({top:0,behavior:'smooth'})}
   else if(k==='pwa')pwaInstall();
   else if(k==='tourN')tourShow(TR16.i+1);
@@ -1306,7 +1306,7 @@ async function pwaInstall(){
 }
 function newsInit(){
   const n=$('#news');if(!n||EMB)return;
-  n.hidden=LS('cl_news','')==='1.8';
+  n.hidden=LS('cl_news','')==='1.8.3';
   if(ENV.ios&&!matchMedia('(display-mode: standalone)').matches&&!EMB){const b=$('#pwaB');if(b)b.hidden=false}   // iPhone: подсказка «На экран Домой»
 }
 async function srvLinks(){                     // сайт не на сервере CheckLink (статический хостинг): ссылки ведут на сервер
